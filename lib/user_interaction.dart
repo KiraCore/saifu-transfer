@@ -47,22 +47,26 @@ class _UserInteractionState extends State<UserInteraction> {
       if (missedFrames.isEmpty) {
         if (i == 0) {
           framesData = {"name": file.name, "type": file.mime, "checksum": checksum, "max": "${list.length + 1}", "page": pageCount};
+          var jsonFrame = jsonEncode(framesData);
+          stdMsgData.add(jsonFrame);
         } else if (i != 0) {
           framesData = {"max": "${list.length + 1}", "page": pageCount, "data": list[i - 1]};
+          var jsonFrame = jsonEncode(framesData);
+          stdMsgData.add(jsonFrame);
         }
-        var jsonFrame = jsonEncode(framesData);
-        stdMsgData.add(jsonFrame);
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
           framesData = {"name": file.name, "type": file.mime, "checksum": checksum, "max": "${list.length + 1}", "page": pageCount};
+          var jsonFrame = jsonEncode(framesData);
+          stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
           framesData = {"max": "${list.length + 1}", "page": pageCount, "data": list[i - 1]};
+          var jsonFrame = jsonEncode(framesData);
+          stdMsgData.add(jsonFrame);
         }
-        var jsonFrame = jsonEncode(framesData);
-        stdMsgData.add(jsonFrame);
       }
-      print(stdMsgData);
     }
+    print(stdMsgData);
   }
 
   @override
@@ -237,17 +241,14 @@ class _UserInteractionState extends State<UserInteraction> {
                                                 return m1["page"].compareTo(m2["page"]);
                                               });
 
-                                              print(dataset);
                                               var base64Data = "";
                                               for (var i = 0; i < dataset.length; i++) {
                                                 var dataValue = dataset[i]['data'];
-                                                print(dataValue);
                                                 base64Data = base64Data + dataValue;
                                               }
-                                              var decodeed = base64.decode(base64Data);
-                                              print(decodeed);
+                                              var decoded = base64.decode(base64Data);
                                               setState(() {
-                                                missedFrames = decodeed;
+                                                missedFrames = decoded;
                                                 generateFrames(filedata, 100);
                                               });
                                             },
