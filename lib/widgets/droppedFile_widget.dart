@@ -15,13 +15,11 @@ class DroppedFileWidget extends StatelessWidget {
   DroppedFileWidget({Key key, this.file, this.controller}) : super(key: key);
 
   Future<void> processData(var data, var splitValue) async {
-    //print(data);
     RegExp frames = new RegExp(".{1," + splitValue.toStringAsFixed(0) + "}");
     String str = base64.encode(data);
     Iterable<Match> matches = frames.allMatches(str);
     var list = matches.map((m) => m.group(0)).toList();
     stdMsgData = [];
-
     for (var i = 0; i < list.length; i++) {
       var pageCount = i + 1;
       var framesData;
@@ -34,7 +32,6 @@ class DroppedFileWidget extends StatelessWidget {
       var jsonFrame = jsonEncode(framesData);
       stdMsgData.add(jsonFrame);
     }
-    print(stdMsgData);
   }
 
   @override

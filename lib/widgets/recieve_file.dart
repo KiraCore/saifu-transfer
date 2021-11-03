@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:archive/archive.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,7 @@ class _RecieveFileState extends State<RecieveFile> {
   var filename;
   var filetype;
 
-  void destructureCode() async {
+  void arrangeFrames() async {
     String data = "";
     var dataset = [];
     for (var i = 0; i < downloadeddata.length; i++) {
@@ -41,16 +40,18 @@ class _RecieveFileState extends State<RecieveFile> {
           filetype = dataset[i]['type'];
           print(filetype);
         });
+      } else {
+        var dataValue = dataset[i]['data'];
+        data = data + dataValue;
       }
-      var dataValue = dataset[i]['data'];
-      data = data + dataValue;
     }
     var decode = base64.decode(data);
+
     var gzipBytes = GZipDecoder().decodeBytes(decode);
+
     setState(() {
       filedata = gzipBytes;
     });
-
     switch (filetype) {
       case "json":
         await FileSaver.instance.saveFile(filename, filedata, '.json', mimeType: MimeType.JSON);
@@ -126,19 +127,16 @@ class _RecieveFileState extends State<RecieveFile> {
                                                       if (mounted && percentage != 100) {
                                                         final decoded = jsonDecode(scanData);
                                                         int max = int.parse(decoded['max']);
-
                                                         var datasize = int.parse(webcamQRData.toSet().length.toString());
                                                         setState(() {
                                                           percentage = (datasize / max) * 100;
                                                           webcamQRData.add(scanData);
                                                         });
-
                                                         if (percentage == 100) {
                                                           setState(() {
                                                             downloadeddata = webcamQRData.toSet().toList();
+                                                            arrangeFrames();
                                                           });
-
-                                                          destructureCode();
                                                         }
                                                       }
                                                     },

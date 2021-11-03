@@ -26,7 +26,7 @@ class KiraLogo extends StatelessWidget {
             ),
             // ignore: prefer_const_constructors
             Text(
-              "LINK",
+              "Transfer",
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             )
           ],
