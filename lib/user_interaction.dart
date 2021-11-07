@@ -4,11 +4,11 @@ import 'package:crypto/crypto.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
-import 'package:saifu_air/utils/webcam/qr_code_scanner_web.dart';
 import 'package:saifu_air/widgets/droppedFile_widget.dart';
 import 'package:saifu_air/modal/dropped_file.dart';
 import 'package:saifu_air/widgets/droppedZone_widget.dart';
 import 'package:saifu_air/utils/saifu_fast_qr.dart';
+import 'package:saifu_air/widgets/missed_frames_dialog.dart';
 import 'package:saifu_air/widgets/recieve_file.dart';
 import 'package:slimy_card/slimy_card.dart';
 
@@ -27,6 +27,8 @@ class _UserInteractionState extends State<UserInteraction> {
   DroppedFile file;
   List<String> stdMsgData = [];
   List<int> missedFrames = [];
+  int max = 0;
+  double percentage = 0;
 
   Future<void> generateFrames(var data, var splitValue) async {
     //print(data);
@@ -188,67 +190,23 @@ class _UserInteractionState extends State<UserInteraction> {
                                         ElevatedButton.icon(
                                             style: ElevatedButton.styleFrom(primary: Colors.white),
                                             onPressed: () async {
-                                              List<String> qrData = [];
-                                              int max = 0;
-                                              double percentage = 0;
-                                              var dataset = [];
-                                              bool scan = true;
-                                              BuildContext dialogContext;
+                                              missedFrames = [];
+
                                               var data = await showDialog(
                                                   context: context,
                                                   useRootNavigator: false,
                                                   builder: (context) {
-                                                    dialogContext = context;
-                                                    return AlertDialog(
-                                                      content: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                          Padding(
-                                                            padding: const EdgeInsets.all(0.0),
-                                                            child: ConstrainedBox(
-                                                              constraints: const BoxConstraints(maxWidth: 300, maxHeight: 250),
-                                                              child: QrCodeCameraWeb(
-                                                                fit: BoxFit.contain,
-                                                                qrCodeCallback: (scanData) async {
-                                                                  if (mounted) {
-                                                                    if (percentage == 100 && scan == true) {
-                                                                      scan = false;
-                                                                      qrData = qrData.toSet().toList();
-
-                                                                      Navigator.pop(dialogContext, qrData);
-                                                                    } else if (percentage < 100) {
-                                                                      final decoded = jsonDecode(scanData);
-                                                                      max = decoded['max'];
-                                                                      qrData.add(scanData);
-                                                                      int datasize = qrData.toSet().length;
-                                                                      percentage = (datasize / max) * 100;
-                                                                    }
-                                                                  }
-                                                                },
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    );
+                                                    return MissedFrames();
                                                   });
-
-                                              for (var i = 0; i < qrData.length; i++) {
-                                                var decodeJson = json.decode(qrData[i]);
-                                                dataset.add(decodeJson);
+                                              var jsonData = [];
+                                              for (var i = 0; i < data.length; i++) {
+                                                var decodeJson = json.decode(data[i]);
+                                                jsonData.add(decodeJson);
+                                                List<int> list = decodeJson['data'].cast<int>();
+                                                list.forEach((item) => missedFrames.add(item));
                                               }
-                                              dataset.sort((m1, m2) {
-                                                return m1["page"].compareTo(m2["page"]);
-                                              });
-
-                                              var base64Data = "";
-                                              for (var i = 0; i < dataset.length; i++) {
-                                                var dataValue = dataset[i]['data'];
-                                                base64Data = base64Data + dataValue;
-                                              }
-                                              var decoded = base64.decode(base64Data);
+                                              missedFrames.sort();
                                               setState(() {
-                                                missedFrames = decoded;
                                                 generateFrames(filedata, 100);
                                               });
                                             },
