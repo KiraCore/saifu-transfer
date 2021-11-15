@@ -55,7 +55,7 @@ class _MissedFramesState extends State<MissedFrames> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "${percentage.toStringAsFixed(0)}" + "%",
+                "${percentage.toStringAsFixed(2)}" + "%",
                 textAlign: TextAlign.center,
               ),
               SizedBox(

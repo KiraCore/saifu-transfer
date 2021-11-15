@@ -3,8 +3,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:saifu_air/utils/webcam/qr_code_scanner_web.dart';
-import 'package:slimy_card/slimy_card.dart';
+import 'package:saifu_air/widgets/recieve_dialog.dart';
 
 class RecieveFile extends StatefulWidget {
   RecieveFile({Key key}) : super(key: key);
@@ -20,6 +19,10 @@ class _RecieveFileState extends State<RecieveFile> {
   var downloadeddata;
   var filename;
   var filetype;
+  List<int> list = [];
+  int maxFrames = 0;
+  bool firstScan = true;
+  int originalMax = 0;
 
   void arrangeFrames() async {
     String data = "";
@@ -34,14 +37,16 @@ class _RecieveFileState extends State<RecieveFile> {
     });
 
     for (var i = 0; i < dataset.length; i++) {
+      var dataValue = "";
       if (i == 0) {
         setState(() {
           filename = dataset[i]['name'];
           filetype = dataset[i]['type'];
-          print(filetype);
         });
-      } else {
-        var dataValue = dataset[i]['data'];
+        dataValue = dataset[i]['data'];
+        data = data + dataValue;
+      } else if (i != 0) {
+        dataValue = dataset[i]['data'];
         data = data + dataValue;
       }
     }
@@ -60,14 +65,32 @@ class _RecieveFileState extends State<RecieveFile> {
       case "png":
         await FileSaver.instance.saveFile(filename, filedata, '.png', mimeType: MimeType.PNG);
         Navigator.of(context).pop();
-
         break;
-      case "mpeg":
+      case "mp3":
         await FileSaver.instance.saveFile(filename, filedata, '.mp3', mimeType: MimeType.MP3);
         Navigator.of(context).pop();
         break;
-      default:
+      case "jpg":
+        await FileSaver.instance.saveFile(filename, filedata, '.jpg', mimeType: MimeType.JPEG);
         Navigator.of(context).pop();
+        break;
+      case "gif":
+        await FileSaver.instance.saveFile(filename, filedata, '.gif', mimeType: MimeType.GIF);
+        Navigator.of(context).pop();
+        break;
+      case "txt":
+        await FileSaver.instance.saveFile(filename, filedata, '.txt', mimeType: MimeType.TEXT);
+        Navigator.of(context).pop();
+        break;
+      case "pdf":
+        await FileSaver.instance.saveFile(filename, filedata, '.pdf', mimeType: MimeType.PDF);
+        Navigator.of(context).pop();
+        break;
+      case "zip":
+        await FileSaver.instance.saveFile(filename, filedata, '.zip', mimeType: MimeType.ZIP);
+        Navigator.of(context).pop();
+        break;
+      default:
     }
   }
 
@@ -101,56 +124,11 @@ class _RecieveFileState extends State<RecieveFile> {
                     padding: const EdgeInsets.all(8.0),
                     child: MaterialButton(
                       onPressed: () async {
+                        setState(() {});
                         showDialog(
                             context: context,
                             builder: (context) => StatefulBuilder(builder: (context, setState) {
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SlimyCard(
-                                          color: Colors.grey[200],
-                                          width: 300,
-                                          topCardHeight: 400,
-                                          bottomCardHeight: 100,
-                                          topCardWidget: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text("Scan QR-Code from Saifu App"),
-                                              Padding(
-                                                padding: const EdgeInsets.all(0.0),
-                                                child: ConstrainedBox(
-                                                  constraints: const BoxConstraints(maxWidth: 300, maxHeight: 250),
-                                                  child: QrCodeCameraWeb(
-                                                    fit: BoxFit.contain,
-                                                    qrCodeCallback: (scanData) async {
-                                                      if (mounted && percentage != 100) {
-                                                        final decoded = jsonDecode(scanData);
-                                                        int max = int.parse(decoded['max']);
-                                                        var datasize = int.parse(webcamQRData.toSet().length.toString());
-                                                        setState(() {
-                                                          percentage = (datasize / max) * 100;
-                                                          webcamQRData.add(scanData);
-                                                        });
-                                                        if (percentage == 100) {
-                                                          setState(() {
-                                                            downloadeddata = webcamQRData.toSet().toList();
-                                                            arrangeFrames();
-                                                          });
-                                                        }
-                                                      }
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                percentage.toStringAsFixed(0) + "%",
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ],
-                                          )),
-                                    ],
-                                  );
+                                  return RecieveDialog();
                                 }));
                       },
                       color: Colors.white,

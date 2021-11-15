@@ -14,7 +14,6 @@ import 'package:slimy_card/slimy_card.dart';
 
 // ignore: must_be_immutable
 class UserInteraction extends StatefulWidget {
-  double percentage = 0;
   UserInteraction({Key key}) : super(key: key);
 
   @override
@@ -28,7 +27,6 @@ class _UserInteractionState extends State<UserInteraction> {
   List<String> stdMsgData = [];
   List<int> missedFrames = [];
   int max = 0;
-  double percentage = 0;
 
   Future<void> generateFrames(var data, var splitValue) async {
     //print(data);
@@ -38,31 +36,32 @@ class _UserInteractionState extends State<UserInteraction> {
     var gzipBytes = GZipEncoder().encode(data);
     RegExp frames = RegExp(".{1," + splitValue.toStringAsFixed(0) + "}");
     String str = base64.encode(gzipBytes);
-    //print(str);
+
     Iterable<Match> matches = frames.allMatches(str);
     var list = matches.map((m) => m.group(0)).toList();
+
     stdMsgData = [];
     Map<String, Object> framesData;
 
-    for (var i = 0; i < list.length + 1; i++) {
+    for (var i = 0; i < list.length; i++) {
       var pageCount = i + 1;
       if (missedFrames.isEmpty) {
         if (i == 0) {
-          framesData = {"name": file.name, "type": file.mime, "checksum": checksum, "max": "${list.length + 1}", "page": pageCount};
+          framesData = {"name": file.name, "type": file.mime, "data": list[i], "checksum": checksum, "max": "${list.length}", "page": pageCount};
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0) {
-          framesData = {"max": "${list.length + 1}", "page": pageCount, "data": list[i - 1]};
+          framesData = {"max": "${list.length}", "page": pageCount, "data": list[i]};
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
-          framesData = {"name": file.name, "type": file.mime, "checksum": checksum, "max": "${list.length + 1}", "page": pageCount};
+          framesData = {"name": file.name, "type": file.mime, "data": list[i], "checksum": checksum, "max": "${missedFrames.length}", "page": pageCount};
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
-          framesData = {"max": "${list.length + 1}", "page": pageCount, "data": list[i - 1]};
+          framesData = {"max": "${missedFrames.length}", "page": pageCount, "data": list[i]};
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
