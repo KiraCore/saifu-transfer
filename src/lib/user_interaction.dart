@@ -4,13 +4,13 @@ import 'package:crypto/crypto.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:saifu_air/utils/checksum_emojis.dart';
 import 'package:saifu_air/widgets/droppedFile_widget.dart';
 import 'package:saifu_air/modal/dropped_file.dart';
 import 'package:saifu_air/widgets/droppedZone_widget.dart';
 import 'package:saifu_air/utils/saifu_fast_qr.dart';
 import 'package:saifu_air/widgets/missed_frames_dialog.dart';
 import 'package:saifu_air/widgets/recieve_file.dart';
-import 'package:slimy_card/slimy_card.dart';
 
 // ignore: must_be_immutable
 class UserInteraction extends StatefulWidget {
@@ -27,11 +27,12 @@ class _UserInteractionState extends State<UserInteraction> {
   List<String> stdMsgData = [];
   List<int> missedFrames = [];
   int max = 0;
+  var checksum = "";
 
   Future<void> generateFrames(var data, var splitValue) async {
     //print(data);
     // Generate checkum of file bytes
-    final checksum = sha256.convert(data).toString();
+    checksum = sha256.convert(data).toString();
     // Encode to Gzip compressions
     var gzipBytes = GZipEncoder().encode(data);
     RegExp frames = RegExp(".{1," + splitValue.toStringAsFixed(0) + "}");
@@ -148,6 +149,8 @@ class _UserInteractionState extends State<UserInteraction> {
                     var filedata = await controller.getFileData(file.event);
                     //var compressedString = base64.encode(gzipBytes);
                     generateFrames(filedata, 100);
+                    var checksumEmoji = await EmojiCheckSum.convertToEmoji(checksum);
+                    bool expandedTile = false;
                     showDialog(
                         context: context,
                         builder: (context) => StatefulBuilder(builder: (context, setState) {
@@ -155,102 +158,126 @@ class _UserInteractionState extends State<UserInteraction> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  SlimyCard(
-                                    color: Colors.grey[200],
-                                    width: 300,
-                                    topCardHeight: 400,
-                                    bottomCardHeight: 100,
-                                    topCardWidget: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text("Scan QR-Code into Saifu App"),
-                                        Container(
-                                          decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(30.0),
-                                              )),
-                                          height: 300,
-                                          width: 300,
-                                          child: Center(
-                                            child: SaifuFastQR(
-                                              transitionDuration: 100,
-                                              itemHeight: 300,
-                                              itemWidth: 300,
-                                              data: stdMsgData,
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    bottomCardWidget: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        ElevatedButton.icon(
-                                            style: ElevatedButton.styleFrom(primary: Colors.white),
-                                            onPressed: () async {
-                                              missedFrames = [];
-
-                                              var data = await showDialog(
-                                                  context: context,
-                                                  useRootNavigator: false,
-                                                  builder: (context) {
-                                                    return MissedFrames();
-                                                  });
-                                              var jsonData = [];
-                                              for (var i = 0; i < data.length; i++) {
-                                                var decodeJson = json.decode(data[i]);
-                                                jsonData.add(decodeJson);
-                                                List<int> list = decodeJson['data'].cast<int>();
-                                                list.forEach((item) => missedFrames.add(item));
-                                              }
-                                              missedFrames.sort();
-                                              setState(() {
-                                                generateFrames(filedata, 100);
-                                              });
-                                            },
-                                            icon: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Icon(
-                                                Icons.document_scanner_rounded,
-                                                color: Colors.black,
+                                  SizedBox(
+                                    height: 650,
+                                    width: 400,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                                      child: Scaffold(
+                                          backgroundColor: Colors.white,
+                                          body: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                "Scan QR-Code",
+                                                style: TextStyle(color: Colors.black, fontSize: 16),
                                               ),
-                                            ),
-                                            label: Text(
-                                              "Specify Missed Frames?",
-                                              style: TextStyle(color: Colors.black),
-                                            ))
-                                      ],
+                                              Spacer(),
+                                              Center(
+                                                child: Container(
+                                                  decoration: new BoxDecoration(
+                                                    color: Colors.grey[200],
+                                                    shape: BoxShape.rectangle,
+                                                    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Container(
+                                                        decoration: new BoxDecoration(color: Colors.black, shape: BoxShape.rectangle, borderRadius: BorderRadius.all(Radius.circular(30.0))),
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: ExpansionTile(
+                                                          iconColor: Colors.white,
+                                                          collapsedIconColor: Colors.white,
+                                                          title: expandedTile
+                                                              ? Text(
+                                                                  checksumEmoji[0],
+                                                                  style: TextStyle(fontSize: 20),
+                                                                  textAlign: TextAlign.center,
+                                                                )
+                                                              : Text(
+                                                                  checksumEmoji[1],
+                                                                  style: TextStyle(fontSize: 20),
+                                                                  textAlign: TextAlign.center,
+                                                                ),
+                                                          onExpansionChanged: (bool expanded) {
+                                                            setState(() {
+                                                              expandedTile = expanded;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+                                                      SaifuFastQR(
+                                                        data: stdMsgData,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Padding(
+                                                padding: const EdgeInsets.all(20.0),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.transparent,
+                                                    border: new Border.all(
+                                                      color: Colors.grey[400],
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius: BorderRadius.all(
+                                                      Radius.circular(10),
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(10.0),
+                                                    child: Row(
+                                                      children: [
+                                                        Spacer(),
+                                                        TextButton(
+                                                          style: ButtonStyle(
+                                                            overlayColor: MaterialStateProperty.all(Colors.transparent),
+                                                          ),
+                                                          onPressed: () async {
+                                                            missedFrames = [];
+
+                                                            var data = await showDialog(
+                                                                context: context,
+                                                                useRootNavigator: false,
+                                                                builder: (context) {
+                                                                  return MissedFrames();
+                                                                });
+                                                            var jsonData = [];
+                                                            for (var i = 0; i < data.length; i++) {
+                                                              var decodeJson = json.decode(data[i]);
+                                                              jsonData.add(decodeJson);
+                                                              List<int> list = decodeJson['data'].cast<int>();
+                                                              list.forEach((item) => missedFrames.add(item));
+                                                            }
+                                                            missedFrames.sort();
+                                                            setState(() {
+                                                              generateFrames(filedata, 100);
+                                                            });
+                                                          },
+                                                          child: Text(
+                                                            "Specify Missed Frames",
+                                                            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
+                                                          ),
+                                                        ),
+                                                        Spacer(),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )),
                                     ),
                                   ),
                                 ],
                               );
                             }));
-/*
-                    showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            content: Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(30.0),
-                                  )),
-                              height: 300,
-                              width: 300,
-                              child: Center(
-                                child: SaifuFastQR(
-                                  transitionDuration: 100,
-                                  itemHeight: 300,
-                                  itemWidth: 300,
-                                  data: stdMsgData,
-                                ),
-                              ),
-                            )));
-
-                            */
                   },
                   icon: const Icon(Icons.check_rounded)),
             ),

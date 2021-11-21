@@ -49,8 +49,9 @@ class _MainScreenState extends State<MainScreen> {
               ),
               Container(
                 height: 500,
-                decoration: const BoxDecoration(
-                    color: Color.fromRGBO(37, 65, 178, 1),
+                decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    //Color.fromRGBO(37, 65, 178, 1),
                     borderRadius: BorderRadius.all(
                       Radius.circular(20.0),
                     )),
@@ -60,12 +61,12 @@ class _MainScreenState extends State<MainScreen> {
                     const Text(
                       "Transfer files using Qr-codes",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w300, fontSize: 30, color: Colors.white),
+                      style: TextStyle(fontWeight: FontWeight.w300, fontSize: 30, color: Colors.black),
                     ),
                     Text(
                       "the convenient way to send files, in a fast and secure manner",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w100, fontSize: 15, color: Colors.blueGrey[100]),
+                      style: TextStyle(fontWeight: FontWeight.w100, fontSize: 15, color: Colors.grey[800]),
                     ),
                     const SizedBox(
                       height: 25,

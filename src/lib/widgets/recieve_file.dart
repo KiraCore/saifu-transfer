@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:archive/archive.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:saifu_air/widgets/recieve_dialog.dart';
 
@@ -13,22 +12,16 @@ class RecieveFile extends StatefulWidget {
 }
 
 class _RecieveFileState extends State<RecieveFile> {
-  List<String> webcamQRData = [];
-  double percentage = 0;
-  Uint8List filedata;
-  var downloadeddata;
+  Uint8List fileData;
+  var scannedData;
   var filename;
   var filetype;
-  List<int> list = [];
-  int maxFrames = 0;
-  bool firstScan = true;
-  int originalMax = 0;
 
   void arrangeFrames() async {
     String data = "";
     var dataset = [];
-    for (var i = 0; i < downloadeddata.length; i++) {
-      var decodeJson = json.decode(downloadeddata[i]);
+    for (var i = 0; i < scannedData.length; i++) {
+      var decodeJson = json.decode(scannedData[i]);
       dataset.add(decodeJson);
     }
 
@@ -55,43 +48,8 @@ class _RecieveFileState extends State<RecieveFile> {
     var gzipBytes = GZipDecoder().decodeBytes(decode);
 
     setState(() {
-      filedata = gzipBytes;
+      fileData = gzipBytes;
     });
-    switch (filetype) {
-      case "json":
-        await FileSaver.instance.saveFile(filename, filedata, '.json', mimeType: MimeType.JSON);
-        Navigator.of(context).pop();
-        break;
-      case "png":
-        await FileSaver.instance.saveFile(filename, filedata, '.png', mimeType: MimeType.PNG);
-        Navigator.of(context).pop();
-        break;
-      case "mp3":
-        await FileSaver.instance.saveFile(filename, filedata, '.mp3', mimeType: MimeType.MP3);
-        Navigator.of(context).pop();
-        break;
-      case "jpg":
-        await FileSaver.instance.saveFile(filename, filedata, '.jpg', mimeType: MimeType.JPEG);
-        Navigator.of(context).pop();
-        break;
-      case "gif":
-        await FileSaver.instance.saveFile(filename, filedata, '.gif', mimeType: MimeType.GIF);
-        Navigator.of(context).pop();
-        break;
-      case "txt":
-        await FileSaver.instance.saveFile(filename, filedata, '.txt', mimeType: MimeType.TEXT);
-        Navigator.of(context).pop();
-        break;
-      case "pdf":
-        await FileSaver.instance.saveFile(filename, filedata, '.pdf', mimeType: MimeType.PDF);
-        Navigator.of(context).pop();
-        break;
-      case "zip":
-        await FileSaver.instance.saveFile(filename, filedata, '.zip', mimeType: MimeType.ZIP);
-        Navigator.of(context).pop();
-        break;
-      default:
-    }
   }
 
   @override
@@ -124,7 +82,6 @@ class _RecieveFileState extends State<RecieveFile> {
                     padding: const EdgeInsets.all(8.0),
                     child: MaterialButton(
                       onPressed: () async {
-                        setState(() {});
                         showDialog(
                             context: context,
                             builder: (context) => StatefulBuilder(builder: (context, setState) {
