@@ -260,20 +260,22 @@ class EmojiCheckSum {
     '❌',
   ];
 
-  static Future<List<String>> convertToEmoji(String data) async {
-    List<int> encodeData = utf8.encode(data);
+  static Future<List<String>> convertToEmoji(String checkSum) async {
+    List<int> encodeData = utf8.encode(checkSum);
     List<String> emojiList = [];
     String longSum = "";
-    for (int i = 0; i < encodeData.length; i++) {
+    for (int i = 0; i < 6; i++) {
       longSum = longSum + EmojiCheckSum.emojis[encodeData[i]];
     }
+    /*
     List<int> shortedData = encodeData.toSet().toList();
     String shortSum = "";
     for (int i = 0; i < shortedData.length; i++) {
       shortSum = shortSum + EmojiCheckSum.emojis[shortedData[i]];
     }
+    */
+    emojiList.add(checkSum);
     emojiList.add(longSum);
-    emojiList.add(shortSum);
     return emojiList;
   }
 }
