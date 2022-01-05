@@ -1,40 +1,37 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:saifu_air/modal/file_model.dart';
 import 'package:saifu_air/services/file_transfer_services.dart';
 import 'package:saifu_air/utils/checksum_emojis.dart';
 import 'package:saifu_air/utils/saifu_fast_qr.dart';
+import 'package:image/image.dart' as Img;
+import 'package:barcode_image/barcode_image.dart';
 import 'package:saifu_air/widgets/secure_dialog.dart';
 import 'package:saifu_air/widgets/upload_request_dialog.dart';
 
-import 'package:image/image.dart' as Img;
-import 'package:barcode_image/barcode_image.dart';
+class UploadText extends StatefulWidget {
+  dynamic textData;
 
-// ignore: must_be_immutable
-class UploadFile extends StatefulWidget {
-  dynamic fileData;
-  FileInformation file;
-
-  UploadFile({this.fileData, this.file});
-
+  UploadText({this.textData});
   @override
-  State<UploadFile> createState() => _UploadFileState();
+  _UploadTextState createState() => _UploadTextState();
 }
 
-class _UploadFileState extends State<UploadFile> {
+class _UploadTextState extends State<UploadText> {
   List<String> stdMsgData = [];
   List<int> missedFrames = [];
-  bool expandedTile = false;
   bool encrypted = false;
-  String base64data = '';
-  String checksum = '';
+  bool expandedTile = false;
   bool loading = false;
+  String checksum = '';
+  String base64data = '';
 
   Future<void> generateInitialFrames(var fileBytes, var split) async {
-    base64data = FileTransferServices().generateBase64data(fileBytes);
+    var convertToBytes = utf8.encode(fileBytes);
+    base64data = FileTransferServices().generateBase64data(convertToBytes);
     checksum = sha256.convert(utf8.encode(base64data)).toString();
     List<String> transferData = FileTransferServices().generateStringFrames(base64data, split);
     sortFrames(transferData);
@@ -71,7 +68,7 @@ class _UploadFileState extends State<UploadFile> {
       var pageCount = i + 1;
       if (missedFrames.isEmpty) {
         if (i == 0) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, processdata.length, encrypted ? 0 : 1];
+          framesData = ["temporary", "txt", processdata.length, pageCount, processdata[i], checksum, processdata.length, encrypted ? 0 : 1];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0) {
@@ -81,7 +78,7 @@ class _UploadFileState extends State<UploadFile> {
         }
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, missedFrames.length, encrypted ? 0 : 1];
+          framesData = ["temporary", "txt", processdata.length, pageCount, processdata[i], checksum, missedFrames.length, encrypted ? 0 : 1];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
@@ -95,7 +92,7 @@ class _UploadFileState extends State<UploadFile> {
 
   @override
   void initState() {
-    generateInitialFrames(widget.fileData, 200);
+    generateInitialFrames(widget.textData, 200);
     super.initState();
   }
 
@@ -110,18 +107,6 @@ class _UploadFileState extends State<UploadFile> {
             alignment: WrapAlignment.center,
             spacing: 30,
             children: [
-              MediaQuery.of(context).size.width < 830
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            "Name: " + widget.file.name + "\n" + "Size: " + widget.file.size + "\n" "Type: " + widget.file.mime,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Container(),
               Container(
                 height: 400,
                 width: 350,
@@ -379,19 +364,6 @@ class _UploadFileState extends State<UploadFile> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    "Name: " + widget.file.name + "\n" + "Size: " + widget.file.size + "\n" "Type: " + widget.file.mime,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
                             SizedBox(
                               width: 200,
                               child: ElevatedButton.icon(

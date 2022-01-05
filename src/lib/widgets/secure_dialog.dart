@@ -23,6 +23,7 @@ class _SecureDialogState extends State<SecureDialog> {
   bool _isWithSpecial = true;
   bool _customTileExpanded = false;
   String isOk = '';
+  String incorrectPassword = '';
   Color _color = Colors.blue;
 
   @override
@@ -77,6 +78,14 @@ class _SecureDialogState extends State<SecureDialog> {
               child: Column(
                 children: [
                   Text('Please enter the passphrase'),
+                  if (passwordText.text.isNotEmpty && passwordText.text != null && widget.encrypted == true)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        incorrectPassword,
+                        style: TextStyle(color: _color, fontSize: 14),
+                      ),
+                    ),
                   IntrinsicWidth(
                     child: Column(
                       children: [
@@ -98,7 +107,9 @@ class _SecureDialogState extends State<SecureDialog> {
                                   _color = Colors.green;
                                   isOk = 'Password is Strong';
                                 }
-                                setState(() {});
+                                setState(() {
+                                  incorrectPassword = '';
+                                });
                               },
                               decoration: InputDecoration(
                                 focusedBorder: OutlineInputBorder(
@@ -110,7 +121,7 @@ class _SecureDialogState extends State<SecureDialog> {
                             ),
                           ),
                         ),
-                        if (passwordText.text.isNotEmpty && passwordText.text != null)
+                        if (passwordText.text.isNotEmpty && passwordText.text != null && widget.encrypted == false)
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
@@ -237,36 +248,75 @@ class _SecureDialogState extends State<SecureDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          icon: Icon(
-                            Icons.close_rounded,
-                            color: Colors.red,
+                      Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(20.0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                blurRadius: 7,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pop(context, false);
+                            },
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: Colors.red,
+                            ),
                           )),
-                      IconButton(
-                          onPressed: () {
-                            if (widget.encrypted) {
-                              try {
-                                String data = AESCryptographyService().decryptAES(widget.data, passwordText.text);
-                                Navigator.pop(context, data);
-                              } catch (e) {
-                                print("AES Decryption failed: $e");
-                              }
-                            } else {
-                              try {
-                                String data = AESCryptographyService().encryptAES(widget.data, passwordText.text);
-                                Navigator.pop(context, data);
-                              } catch (e) {
-                                print("AES Encryption failed: $e");
-                              }
-                            }
-                          },
-                          icon: Icon(
-                            Icons.check_rounded,
-                            color: Colors.green,
-                          )),
+                      Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(20.0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                blurRadius: 7,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                              onTap: () {
+                                if (widget.encrypted) {
+                                  try {
+                                    bool verifyPassword = AESCryptographyService().verifyPassword(widget.data, passwordText.text);
+
+                                    if (verifyPassword == true) {
+                                      String data = AESCryptographyService().decryptAES(widget.data, passwordText.text);
+                                      Navigator.pop(context, data);
+                                    } else {
+                                      setState(() {
+                                        incorrectPassword = "The password you entered is incorrect, please try again";
+                                      });
+                                    }
+                                  } catch (e) {
+                                    print("AES Decryption failed: $e");
+                                  }
+                                } else {
+                                  try {
+                                    String data = AESCryptographyService().encryptAES(widget.data, passwordText.text);
+                                    Navigator.pop(context, data);
+                                  } catch (e) {
+                                    print("AES Encryption failed: $e");
+                                  }
+                                }
+                              },
+                              child: Icon(
+                                Icons.check_rounded,
+                                color: Colors.green,
+                              ))),
                     ],
                   )
                 ],

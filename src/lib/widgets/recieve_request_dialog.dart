@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:saifu_air/utils/saifu_fast_qr.dart';
 
@@ -14,63 +10,6 @@ class RecieveRequestDialog extends StatefulWidget {
 }
 
 class _RecieveRequestDialogState extends State<RecieveRequestDialog> {
-  List<String> webcamData = [];
-
-  bool firstScan = true;
-
-  int originalMax = 0;
-
-  int maxFrames = 0;
-
-  bool recievedData = false;
-
-  double percentage = 0;
-
-  List<String> scannedData;
-  String filename;
-  String filetype;
-  Uint8List fileData;
-
-  void arrangeFrames() async {
-    String data = "";
-    var dataset = [];
-    for (var i = 0; i < scannedData.length; i++) {
-      var decodeJson = json.decode(scannedData[i]);
-      dataset.add(decodeJson);
-    }
-
-    dataset.sort((m1, m2) {
-      return m1[3].compareTo(m2[3]);
-    });
-    //var checksum;
-    for (var i = 0; i < dataset.length; i++) {
-      var dataValue = "";
-
-      if (i == 0) {
-        setState(() {
-          filename = dataset[i][0];
-          filetype = dataset[i][1];
-          dataValue = dataset[i][4];
-          //checksum = dataset[i]['checksum'];
-          data = data + dataValue;
-        });
-      } else if (i != 0) {
-        dataValue = dataset[i][4];
-        data = data + dataValue;
-      }
-    }
-    //var emoji = await EmojiCheckSum.convertToEmoji(checksum);
-    var decode = base64.decode(data);
-    var gzipBytes = GZipDecoder().decodeBytes(decode);
-    //final decodedCheckSum = sha256.convert(gzipBytes).toString();
-    setState(() {
-      fileData = gzipBytes;
-      print(fileData);
-      //checkSumEmoji = emoji;
-      //checksum == decodedCheckSum ? validChecksum = true : validChecksum = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -154,7 +93,7 @@ class _RecieveRequestDialogState extends State<RecieveRequestDialog> {
                       style: ElevatedButton.styleFrom(
                         primary: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12), // <-- Radius
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
