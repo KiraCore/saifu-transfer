@@ -1,11 +1,11 @@
-class DroppedFile {
+class FileInformation {
   final String url;
   final String name;
   final String mime;
   final int bytes;
-  final dynamic event;
+  final dynamic data;
 
-  const DroppedFile({this.url, this.name, this.mime, this.bytes, this.event});
+  FileInformation({this.url, this.name, this.mime, this.bytes, this.data});
 
   String get size {
     final kb = bytes / 1024;

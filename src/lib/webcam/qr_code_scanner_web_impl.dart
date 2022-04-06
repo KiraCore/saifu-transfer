@@ -4,7 +4,10 @@
 // - https://medium.com/@mk.pyts/how-to-access-webcam-video-stream-in-flutter-for-web-1bdc74f2e9c7
 // - https://kevinwilliams.dev/blog/taking-photos-with-flutter-web
 // - https://github.com/cozmo/jsQR
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
+import 'dart:developer';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 // ignore: avoid_web_libraries_in_flutter
@@ -28,7 +31,7 @@ class QrCodeCameraWebImpl extends StatefulWidget {
   final BoxFit fit;
   final Widget Function(BuildContext context, Object error) onError;
 
-  QrCodeCameraWebImpl({
+  const QrCodeCameraWebImpl({
     Key key,
     @required this.qrCodeCallback,
     this.child,
@@ -110,14 +113,14 @@ class _QrCodeCameraWebImplState extends State<QrCodeCameraWebImpl> {
       waiting = false;
       if (code != null) {
         String value = code['data'];
-        this.widget.qrCodeCallback(value);
+        widget.qrCodeCallback(value);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: double.infinity,
       width: double.infinity,
       child: FittedBox(
@@ -142,7 +145,7 @@ class _QrCodeCameraWebImplState extends State<QrCodeCameraWebImpl> {
           mt.stop();
         });
       } catch (e) {
-        print('error on dispose qrcode: $e');
+        log('error on dispose qrcode: $e');
       }
     });
     super.dispose();

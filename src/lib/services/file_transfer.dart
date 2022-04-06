@@ -6,7 +6,7 @@ class FileTransferServices {
   String generateBase64data(var fileBytes) {
     // This takes the file bytes of the original imported file
     // Gzip it, base64 encodes it
-    var gzipBytes = GZipEncoder().encode(fileBytes);
+    dynamic gzipBytes = GZipEncoder().encode(fileBytes);
     String str = base64.encode(gzipBytes);
     return str;
   }

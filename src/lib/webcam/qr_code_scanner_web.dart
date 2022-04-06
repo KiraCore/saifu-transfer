@@ -1,12 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'qr_code_scanner_web_impl_no_web.dart' if (dart.library.html) 'qr_code_scanner_web_impl.dart';
 
-class QrCodeCameraWebImpl extends StatefulWidget {
+class QrCodeCameraWeb extends StatelessWidget {
   final void Function(String qrValue) qrCodeCallback;
   final Widget child;
   final BoxFit fit;
   final Widget Function(BuildContext context, Object error) onError;
 
-  QrCodeCameraWebImpl({
+  const QrCodeCameraWeb({
     Key key,
     @required this.qrCodeCallback,
     this.child,
@@ -16,15 +17,13 @@ class QrCodeCameraWebImpl extends StatefulWidget {
         super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    throw FittedBox(
-      fit: this.fit,
-      child: Container(
-        child: Text('it is not in web environment'),
-      ),
+  Widget build(BuildContext context) {
+    return QrCodeCameraWebImpl(
+      key: key,
+      qrCodeCallback: qrCodeCallback,
+      child: child,
+      fit: fit,
+      onError: onError,
     );
   }
-
 }
-
-

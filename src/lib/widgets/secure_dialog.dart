@@ -1,13 +1,17 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:saifu_air/services/aes_services.dart';
-import 'package:saifu_air/services/random_password.dart';
+import 'package:saifu_transfer/services/aes_cryptography.dart';
+import 'package:saifu_transfer/widgets/random_password.dart';
 
 // ignore: must_be_immutable
 class SecureDialog extends StatefulWidget {
   String data;
   bool encrypted = false;
-  SecureDialog(this.data, this.encrypted);
+  SecureDialog(this.data, this.encrypted, {Key key}) : super(key: key);
   @override
   State<SecureDialog> createState() => _SecureDialogState();
 }
@@ -46,14 +50,15 @@ class _SecureDialogState extends State<SecureDialog> {
 
     return AlertDialog(
       elevation: 50,
-      shape: RoundedRectangleBorder(side: BorderSide(color: Colors.white, width: 5), borderRadius: BorderRadius.all(Radius.circular(32.0))),
+      shape: const RoundedRectangleBorder(side: BorderSide(color: Colors.white, width: 5), borderRadius: BorderRadius.all(Radius.circular(8.0))),
       content: SizedBox(
-        width: 500,
+        width: 400,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
                   style: ButtonStyle(
@@ -61,11 +66,11 @@ class _SecureDialogState extends State<SecureDialog> {
                   ),
                   onPressed: () => Navigator.pop(context, false),
                   icon: Icon(
-                    Icons.navigate_before,
+                    Icons.close_rounded,
                     color: Colors.black,
                   ),
                   label: Text(
-                    "Back",
+                    "",
                     style: TextStyle(color: Colors.black),
                   ),
                 )
@@ -116,7 +121,7 @@ class _SecureDialogState extends State<SecureDialog> {
                                   borderRadius: BorderRadius.all(Radius.circular(4)),
                                   borderSide: BorderSide(width: 1, color: Colors.black),
                                 ),
-                                border: OutlineInputBorder(borderSide: new BorderSide(color: Colors.amberAccent)),
+                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.amberAccent)),
                               ),
                             ),
                           ),
@@ -246,77 +251,59 @@ class _SecureDialogState extends State<SecureDialog> {
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(20.0),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                blurRadius: 7,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
+                      SizedBox(
+                        child: ElevatedButton(
+                          child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(
+                                width: 200,
+                                child: widget.encrypted
+                                    ? Text(
+                                        "Unlock QR-Code",
+                                        style: TextStyle(color: Colors.black),
+                                        textAlign: TextAlign.center,
+                                      )
+                                    : Text(
+                                        "Secure QR-Code",
+                                        style: TextStyle(color: Colors.black),
+                                        textAlign: TextAlign.center,
+                                      )),
                           ),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pop(context, false);
-                            },
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: Colors.red,
-                            ),
-                          )),
-                      Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(20.0),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                blurRadius: 7,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                              onTap: () {
-                                if (widget.encrypted) {
-                                  try {
-                                    bool verifyPassword = AESCryptographyService().verifyPassword(widget.data, passwordText.text);
+                          onPressed: () {
+                            if (widget.encrypted) {
+                              try {
+                                bool verifyPassword = AESCryptographyService().verifyPassword(widget.data, passwordText.text);
 
-                                    if (verifyPassword == true) {
-                                      String data = AESCryptographyService().decryptAES(widget.data, passwordText.text);
-                                      Navigator.pop(context, data);
-                                    } else {
-                                      setState(() {
-                                        incorrectPassword = "The password you entered is incorrect, please try again";
-                                      });
-                                    }
-                                  } catch (e) {
-                                    print("AES Decryption failed: $e");
-                                  }
+                                if (verifyPassword == true) {
+                                  String data = AESCryptographyService().decryptAES(widget.data, passwordText.text);
+                                  Navigator.pop(context, data);
                                 } else {
-                                  try {
-                                    String data = AESCryptographyService().encryptAES(widget.data, passwordText.text);
-                                    Navigator.pop(context, data);
-                                  } catch (e) {
-                                    print("AES Encryption failed: $e");
-                                  }
+                                  setState(() {
+                                    incorrectPassword = "The password you entered is incorrect, please try again";
+                                  });
                                 }
-                              },
-                              child: Icon(
-                                Icons.check_rounded,
-                                color: Colors.green,
-                              ))),
+                              } catch (e) {
+                                log("AES Decryption failed: $e");
+                              }
+                            } else {
+                              try {
+                                String data = AESCryptographyService().encryptAES(widget.data, passwordText.text);
+                                Navigator.pop(context, data);
+                              } catch (e) {
+                                log("AES Encryption failed: $e");
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.grey[50],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   )
                 ],
