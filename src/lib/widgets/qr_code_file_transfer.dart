@@ -2,8 +2,8 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:saifu_transfer/webcam/qr_code_scanner_web.dart';
-import 'package:saifu_transfer/widgets/receive_request_dialog.dart';
+import 'package:saifu_air/webcam/qr_code_scanner_web.dart';
+import 'package:saifu_air/widgets/receive_request_dialog.dart';
 
 class QrCodeFileTransfer extends StatefulWidget {
   const QrCodeFileTransfer({Key key}) : super(key: key);

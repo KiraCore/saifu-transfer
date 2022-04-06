@@ -3,7 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:saifu_transfer/webcam/qr_code_scanner_web.dart';
+import 'package:saifu_air/webcam/qr_code_scanner_web.dart';
 
 class UploadRequestDialog extends StatefulWidget {
   const UploadRequestDialog({Key key}) : super(key: key);

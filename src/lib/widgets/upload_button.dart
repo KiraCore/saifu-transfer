@@ -4,8 +4,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
-import 'package:saifu_transfer/file_model.dart';
-import 'package:saifu_transfer/screens/upload_file.dart';
+import 'package:saifu_air/file_model.dart';
+import 'package:saifu_air/screens/upload_file.dart';
 
 class UploadButton extends StatefulWidget {
   const UploadButton({

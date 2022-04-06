@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
-import 'package:saifu_transfer/widgets/recieve_button.dart';
-import 'package:saifu_transfer/widgets/title_widget.dart';
-import 'package:saifu_transfer/widgets/upload_button.dart';
+import 'package:saifu_air/widgets/recieve_button.dart';
+import 'package:saifu_air/widgets/title_widget.dart';
+import 'package:saifu_air/widgets/upload_button.dart';
 
 void main() {
   runApp(const MyApp());

@@ -2,8 +2,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:saifu_transfer/screens/receive_file.dart';
-import 'package:saifu_transfer/widgets/qr_code_file_transfer.dart';
+import 'package:saifu_air/screens/receive_file.dart';
+import 'package:saifu_air/widgets/qr_code_file_transfer.dart';
 
 class RecieveButton extends StatelessWidget {
   const RecieveButton({

@@ -10,11 +10,11 @@ import 'package:flutter/material.dart';
 
 import 'package:image/image.dart' as img;
 import 'package:barcode_image/barcode_image.dart';
-import 'package:saifu_transfer/services/file_transfer.dart';
-import 'package:saifu_transfer/widgets/emoji_widget.dart';
-import 'package:saifu_transfer/widgets/secure_dialog.dart';
-import 'package:saifu_transfer/widgets/title_widget.dart';
-import 'package:saifu_transfer/widgets/upload_request_dialog.dart';
+import 'package:saifu_air/services/file_transfer.dart';
+import 'package:saifu_air/widgets/emoji_widget.dart';
+import 'package:saifu_air/widgets/secure_dialog.dart';
+import 'package:saifu_air/widgets/title_widget.dart';
+import 'package:saifu_air/widgets/upload_request_dialog.dart';
 import 'package:saifu_qr/saifu_qr.dart';
 
 // ignore: must_be_immutable

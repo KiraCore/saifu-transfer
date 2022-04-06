@@ -4,8 +4,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:saifu_transfer/services/aes_cryptography.dart';
-import 'package:saifu_transfer/widgets/random_password.dart';
+import 'package:saifu_air/services/aes_cryptography.dart';
+import 'package:saifu_air/widgets/random_password.dart';
 
 // ignore: must_be_immutable
 class SecureDialog extends StatefulWidget {

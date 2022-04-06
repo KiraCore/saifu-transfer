@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:saifu_transfer/services/checksum_emojis.dart';
+import 'package:saifu_air/services/checksum_emojis.dart';
 
 class EmojiWidget extends StatefulWidget {
   const EmojiWidget({
