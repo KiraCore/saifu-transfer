@@ -37,3 +37,14 @@ jobs:
               pr_label: "kira-automation"
               pr_assignee: "asmodat"
               pr_allow_empty: true
+          - name: Create PR from a version branch to dev after version branch push
+            if: startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.')
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
+            with:
+              github_token: ${{ secrets.REPO_ACCESS }}
+              source_branch: ${{ env.SOURCE_BRANCH }}
+              destination_branch: 'dev'
+              pr_title: "${{ env.SOURCE_BRANCH }} -> dev" 
+              pr_label: "kira-automation"
+              pr_assignee: "AmanuelYosief"
+              pr_allow_empty: true
