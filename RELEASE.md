@@ -1,5 +1,4 @@
 ## SAIFU transfer
 
 ### Features:
-* Added github workflows
-* Simplified build process with makefile
+* This is just a simple build test
