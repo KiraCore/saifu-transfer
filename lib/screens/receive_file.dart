@@ -270,6 +270,35 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                           ],
                                         ),
                                       ),
+                                      encrypted
+                                          ? Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(5)),
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Text(
+                                                        "File is encrypted ",
+                                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                      ),
+                                                    ])),
+                                              ],
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Text(
+                                                        "WARNING: File IS NOT encrypted ",
+                                                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                                      ),
+                                                    ])),
+                                              ],
+                                            ),
                                       const SizedBox(
                                         height: 10,
                                       ),
@@ -294,7 +323,6 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                     ? Container(
                                                         padding: const EdgeInsets.all(5.0),
                                                         decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
                                                             color: Colors.white,
                                                             borderRadius: BorderRadius.all(
                                                               Radius.circular(20.0),
@@ -302,19 +330,18 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                         child: Icon(
                                                           Icons.lock_outlined,
                                                           size: 30,
-                                                          color: Colors.red,
+                                                          color: Colors.black,
                                                         ),
                                                       )
                                                     : Container(
                                                         padding: const EdgeInsets.all(5.0),
                                                         decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
                                                             color: Colors.white,
                                                             borderRadius: BorderRadius.all(
                                                               Radius.circular(20.0),
                                                             )),
                                                         child: Icon(
-                                                          Icons.lock_open_outlined,
+                                                          Icons.lock_open,
                                                           size: 30,
                                                           color: Colors.black,
                                                         ),
