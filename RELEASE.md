@@ -1,5 +1,5 @@
-## SAIFU transfer
+## saifu-transfer
+###### Simple end to end encrypted & over the air file transfers
 
 ### Features:
-* Added github workflows
-* Simplified build process with makefile
+* Added signatures to release files
