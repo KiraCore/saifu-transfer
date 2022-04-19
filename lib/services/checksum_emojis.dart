@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class EmojiCheckSum {
   static const emojis = [
     '🎪',
@@ -261,19 +259,20 @@ class EmojiCheckSum {
   ];
 
   static Future<List<String>> convertToEmoji(String checkSum) async {
-    List<int> encodeData = utf8.encode(checkSum);
     List<String> emojiList = [];
     String longSum = "";
+    // Recieves checksum and split them tnto groups of twos
+    RegExp exp = RegExp(".{1," + 2.toStringAsFixed(0) + "}");
+    //  Uses regrex expression
+    Iterable<Match> matches = exp.allMatches(checkSum);
+    // Converts the regrex condition with the checksum into a list
+    List<String> list = matches.map((m) => m.group(0)).toList();
+    final integers = list.map((s) => int.parse(s, radix: 16)).toList();
+
     for (int i = 0; i < 6; i++) {
-      longSum = longSum + EmojiCheckSum.emojis[encodeData[i]];
+      longSum = longSum + EmojiCheckSum.emojis[integers[i]];
     }
-    /*
-    List<int> shortedData = encodeData.toSet().toList();
-    String shortSum = "";
-    for (int i = 0; i < shortedData.length; i++) {
-      shortSum = shortSum + EmojiCheckSum.emojis[shortedData[i]];
-    }
-    */
+
     emojiList.add(checkSum);
     emojiList.add(longSum);
     return emojiList;
