@@ -155,6 +155,35 @@ class _UploadedFileState extends State<UploadedFile> {
                                     ],
                                   ),
                                 ),
+                                encrypted
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(5)),
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                Text(
+                                                  "File is encrypted ",
+                                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                ),
+                                              ])),
+                                        ],
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              decoration: BoxDecoration(color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                Text(
+                                                  "WARNING: File IS NOT encrypted ",
+                                                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                                ),
+                                              ])),
+                                        ],
+                                      ),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -179,7 +208,6 @@ class _UploadedFileState extends State<UploadedFile> {
                                               ? Container(
                                                   padding: const EdgeInsets.all(5.0),
                                                   decoration: BoxDecoration(
-                                                      border: Border.all(color: Colors.grey),
                                                       color: Colors.white,
                                                       borderRadius: BorderRadius.all(
                                                         Radius.circular(20.0),
@@ -187,19 +215,18 @@ class _UploadedFileState extends State<UploadedFile> {
                                                   child: Icon(
                                                     Icons.lock_outlined,
                                                     size: 30,
-                                                    color: Colors.red,
+                                                    color: Colors.black,
                                                   ),
                                                 )
                                               : Container(
                                                   padding: const EdgeInsets.all(5.0),
                                                   decoration: BoxDecoration(
-                                                      border: Border.all(color: Colors.grey),
                                                       color: Colors.white,
                                                       borderRadius: BorderRadius.all(
                                                         Radius.circular(20.0),
                                                       )),
                                                   child: Icon(
-                                                    Icons.lock_open_outlined,
+                                                    Icons.lock_open,
                                                     size: 30,
                                                     color: Colors.black,
                                                   ),
