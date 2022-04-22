@@ -91,40 +91,47 @@ class _SecureDialogState extends State<SecureDialog> {
                         style: TextStyle(color: _color, fontSize: 14),
                       ),
                     ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   IntrinsicWidth(
                     child: Column(
                       children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                          child: SizedBox(
-                            width: 300,
-                            child: TextField(
-                              controller: passwordText,
-                              onChanged: (value) {
-                                double passwordstrength = password.checkPassword(password: value);
-                                if (passwordstrength < 0.3) {
-                                  _color = Colors.red;
-                                  isOk = 'Password is weak!';
-                                } else if (passwordstrength < 0.7) {
-                                  _color = Colors.blue;
-                                  isOk = 'Password is Good';
-                                } else {
-                                  _color = Colors.green;
-                                  isOk = 'Password is Strong';
-                                }
-                                setState(() {
-                                  incorrectPassword = '';
-                                });
-                              },
-                              decoration: InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(4)),
-                                  borderSide: BorderSide(width: 1, color: Colors.black),
-                                ),
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.amberAccent)),
-                              ),
-                            ),
+                        SizedBox(
+                          width: 300,
+                          child: TextField(
+                            controller: passwordText,
+                            onChanged: (value) {
+                              double passwordstrength = password.checkPassword(password: value);
+                              if (passwordstrength < 0.3) {
+                                _color = Colors.red;
+                                isOk = 'Password is weak!';
+                              } else if (passwordstrength < 0.7) {
+                                _color = Colors.blue;
+                                isOk = 'Password is Good';
+                              } else {
+                                _color = Colors.green;
+                                isOk = 'Password is Strong';
+                              }
+                              setState(() {
+                                incorrectPassword = '';
+                              });
+                            },
+                            decoration: InputDecoration(
+                                suffix: passwordText.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(
+                                          Icons.copy,
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          Clipboard.setData(ClipboardData(text: passwordText.text));
+                                        })
+                                    : Container()),
                           ),
+                        ),
+                        SizedBox(
+                          height: 10,
                         ),
                         if (passwordText.text.isNotEmpty && passwordText.text != null && widget.encrypted == false)
                           Padding(
@@ -277,7 +284,7 @@ class _SecureDialogState extends State<SecureDialog> {
                                 bool verifyPassword = AESCryptographyService().verifyPassword(widget.data, passwordText.text);
 
                                 if (verifyPassword == true) {
-                                  String data = AESCryptographyService().decryptAES(widget.data, passwordText.text);
+                                  String data = AESCryptographyService.decryptAES(widget.data, passwordText.text);
                                   Navigator.pop(context, data);
                                 } else {
                                   setState(() {
@@ -289,7 +296,7 @@ class _SecureDialogState extends State<SecureDialog> {
                               }
                             } else {
                               try {
-                                String data = AESCryptographyService().encryptAES(widget.data, passwordText.text);
+                                String data = AESCryptographyService.encryptAES(widget.data, passwordText.text);
                                 Navigator.pop(context, data);
                               } catch (e) {
                                 log("AES Encryption failed: $e");
