@@ -270,6 +270,55 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                           ],
                                         ),
                                       ),
+                                      encrypted
+                                          ? Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(5)),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          "File IS encrypted",
+                                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                        child: Icon(
+                                                          Icons.lock_outlined,
+                                                          size: 25,
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                    ])),
+                                              ],
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          "WARNING: File IS NOT encrypted",
+                                                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                        child: Icon(
+                                                          Icons.lock_open,
+                                                          size: 25,
+                                                          color: Colors.black,
+                                                        ),
+                                                      )
+                                                    ])),
+                                              ],
+                                            ),
                                       const SizedBox(
                                         height: 10,
                                       ),
@@ -287,38 +336,39 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                               data: stdMsgData,
                                             ),
                                           ),
-                                          Positioned.fill(
-                                            child: Align(
-                                                alignment: Alignment.bottomCenter,
-                                                child: encrypted
-                                                    ? Container(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
-                                                            color: Colors.white,
-                                                            borderRadius: BorderRadius.all(
-                                                              Radius.circular(20.0),
-                                                            )),
-                                                        child: Icon(
-                                                          Icons.lock_outlined,
-                                                          size: 30,
-                                                          color: Colors.red,
-                                                        ),
-                                                      )
-                                                    : Container(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
-                                                            color: Colors.white,
-                                                            borderRadius: BorderRadius.all(
-                                                              Radius.circular(20.0),
-                                                            )),
-                                                        child: Icon(
-                                                          Icons.lock_open_outlined,
-                                                          size: 30,
-                                                          color: Colors.black,
-                                                        ),
-                                                      )),
+                                          Visibility(
+                                            visible: false,
+                                            child: Positioned.fill(
+                                              child: Align(
+                                                  alignment: Alignment.bottomCenter,
+                                                  child: encrypted
+                                                      ? Container(
+                                                          padding: const EdgeInsets.all(5.0),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white,
+                                                              borderRadius: BorderRadius.all(
+                                                                Radius.circular(20.0),
+                                                              )),
+                                                          child: Icon(
+                                                            Icons.lock_outlined,
+                                                            size: 30,
+                                                            color: Colors.black,
+                                                          ),
+                                                        )
+                                                      : Container(
+                                                          padding: const EdgeInsets.all(5.0),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white,
+                                                              borderRadius: BorderRadius.all(
+                                                                Radius.circular(20.0),
+                                                              )),
+                                                          child: Icon(
+                                                            Icons.lock_open,
+                                                            size: 30,
+                                                            color: Colors.black,
+                                                          ),
+                                                        )),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -327,7 +377,7 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Wrap(
                                             direction: Axis.horizontal,
-                                            alignment: WrapAlignment.spaceBetween,
+                                            alignment: WrapAlignment.center,
                                             children: [
                                               Text(fileName, overflow: TextOverflow.ellipsis),
                                             ],

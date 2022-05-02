@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
 
 class AESCryptographyService {
-  String encryptAES(String database, String password) {
+  static String encryptAES(String database, String password) {
     // Create Hash of Password (Hexadecimal)
     Digest hashedPassword = sha256.convert(utf8.encode(password));
 
@@ -66,7 +66,7 @@ class AESCryptographyService {
     }
   }
 
-  String decryptAES(encryptedData, password) {
+  static String decryptAES(encryptedData, password) {
     Digest hashedPassword = sha256.convert(utf8.encode(password));
     // Decrypts base 64 string of encrypted data into bytes format
     final base64decode = base64Decode(encryptedData);
