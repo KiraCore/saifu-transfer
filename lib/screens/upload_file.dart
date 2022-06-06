@@ -55,21 +55,46 @@ class _UploadedFileState extends State<UploadedFile> {
       var pageCount = i + 1;
       if (missedFrames.isEmpty) {
         if (i == 0) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, processdata.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            processdata.length,
+            [widget.file.name, widget.file.mime, encrypted ? 0 : 1, checksum, processdata[i]]
+          ];
+
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0) {
-          framesData = [[], [], processdata.length, pageCount, processdata[i], [], processdata.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            processdata.length,
+            [[], [], encrypted ? 0 : 1, [], processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, missedFrames.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            missedFrames.length,
+            [widget.file.name, widget.file.mime, encrypted ? 0 : 1, checksum, processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
-          framesData = [[], [], processdata.length, pageCount, processdata[i], [], missedFrames.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            missedFrames.length,
+            [[], [], encrypted ? 0 : 1, [], processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
