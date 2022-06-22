@@ -9,6 +9,12 @@ publish:
 clean:
 	./scripts/clean.sh
 
+test:
+	./scripts/test.sh
+
+local-test:
+	./scripts/local-test.sh
+
 docker-start:
 	./scripts/docker-start.sh
 

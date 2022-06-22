@@ -64,33 +64,31 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
               cd ../ && tar -czvf src.tar.gz -C ./saifu-transfer . && cp ./src.tar.gz ./saifu-transfer/src.tar.gz
               cd ./saifu-transfer
-               . /etc/profile
-              go version
               flutter --version
               echo "Bash Utils Version: $(bash-utils bashUtilsVersion)"
               echo "     Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
-              echo "       Event name: ${{ github.event_name }}"
-              echo "  Repository name: ${{ env.REPOSITORY_NAME }}"
-              echo "  Release version: ${{ env.RELEASE_VER }}"
-              echo "   Release exists: ${{ env.RELEASE_EXISTS }}"
+              echo "        Event name: ${{ github.event_name }}"
+              echo "   Repository name: ${{ env.REPOSITORY_NAME }}"
+              echo "   Release version: ${{ env.RELEASE_VER }}"
+              echo "    Release exists: ${{ env.RELEASE_EXISTS }}"
           - name: SAIFU transfer Build & Install Packages
             run: |
               echo "(current dir): $PWD" && ls -l ./
               chmod -Rv 555 ./scripts
               make build
-          #- name: SAIFU Unit Tests
-          #  run: |
-          #    make test
-          #- name: SAIFU Local Integration Tests
-          #  run: |
-          #    make local-test
+          - name: Unit Testsing
+            run: |
+              make test
+          - name: Local Integration Testsing
+            run: |
+              make local-test
           - name: Publishing Binaries
             shell: bash
             run: |
               make publish
               echo "INFO: Unpacking web app..."
-              mkdir -p ./build/ipfs && cd ./build/ipfs
+              rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
               IPFS_HASH=$(ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT | tail -n 1 | jsonParse ".IpfsHash")
               echo "IPFS_HASH=$IPFS_HASH" >> ./bin/public-envs.sh
