@@ -90,7 +90,9 @@ jobs:
               echo "INFO: Unpacking web app..."
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
-              IPFS_HASH=$(ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT | tail -n 1 | bash-utils jsonParse ".IpfsHash")
+              ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT &> ipfs-pin.log
+              cat ipfs-pin.log
+              IPFS_HASH=$(cat ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".IpfsHash")
               echo "IPFS_HASH=$IPFS_HASH" >> ./bin/public-envs.sh
               echo "INFO: Updating release file"
               touch ./RELEASE.md
