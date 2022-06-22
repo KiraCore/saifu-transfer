@@ -67,7 +67,7 @@ jobs:
                . /etc/profile
               go version
               flutter --version
-              echo "Bash Utils Version: $(bashUtilsVersion)"
+              echo "Bash Utils Version: $(bash-utils bashUtilsVersion)"
               echo "     Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
               echo "       Event name: ${{ github.event_name }}"
