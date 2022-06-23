@@ -270,15 +270,13 @@ jobs:
               GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
               LOG: "TRACE"
           - name: Comment PR's with IPFS
-            # ref.: https://github.com/dessant/repo-lockdown
-            uses: dessant/repo-lockdown@0b093279a77b44bbc38e85089b5463dd06b4aea4
+            # ref.: https://github.com/actions-cool/maintain-one-comment, v2.0.2
+            uses: actions-cool/maintain-one-comment@cc0daaf4db77952f0b631bb2c1e169813d78a7fd
             if: github.event_name == 'pull_request' 
             with:
-              pr-labels: 'ipfs'
-              pr-comment: >
+              token: ${{ secrets.GITHUB_TOKEN }}
+              update-mode: replace
+              body: >
                 Web app was deployed to IPFS:
                 * Private Gateway: [https://ipfs.kira.network/ipfs/$IPFS_HASH](https://ipfs.kira.network/ipfs/$IPFS_HASH/index.html)
                 * Public Gateway: [https://ipfs.io/ipfs/$IPFS_HASH](https://ipfs.io/ipfs/$IPFS_HASH/index.html)
-              close-pr: false
-              lock-pr: false
-              
