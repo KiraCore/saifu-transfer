@@ -276,7 +276,16 @@ jobs:
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
               update-mode: replace
-              body: >
+              body: |
                 Web app was deployed to IPFS:
-                * Private Gateway: [https://ipfs.kira.network/ipfs/$IPFS_HASH](https://ipfs.kira.network/ipfs/$IPFS_HASH/index.html)
-                * Public Gateway: [https://ipfs.io/ipfs/$IPFS_HASH](https://ipfs.io/ipfs/$IPFS_HASH/index.html)
+
+                * Private Gateway: [ipfs.kira.network/ipfs/${{env.IPFS_HASH}}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
+
+                * Public Gateway: [ipfs.io/ipfs/${{env.IPFS_HASH}}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
+          - name: Add IPFS published label
+            # ref.: https://github.com/andymckay/labeler, v1.0.4
+            uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
+            if: github.event_name == 'pull_request' 
+            with:
+              token: ${{ secrets.GITHUB_TOKEN }}
+              add-labels: "ipfs-published"
