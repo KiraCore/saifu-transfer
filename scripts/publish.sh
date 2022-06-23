@@ -11,3 +11,7 @@ mkdir -p ./bin
 cd ./build/web
 
 zip -r ../../bin/html-web-app.zip ./*
+
+sed -i 's/base href="\/"/base href=\".\/\"/' index.html
+
+zip -r ../../bin/ipfs-web-app.zip ./*
