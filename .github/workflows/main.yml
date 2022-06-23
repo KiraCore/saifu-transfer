@@ -91,7 +91,7 @@ jobs:
               echo "INFO: Unpacking web app..."
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
-              ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
+              ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=${{secrets.PINATA_API_JWT}} | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
               IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".IpfsHash")
               echo "IPFS_HASH=$IPFS_HASH" >> ./bin/public-envs.sh
               echo "INFO: Updating release file"
