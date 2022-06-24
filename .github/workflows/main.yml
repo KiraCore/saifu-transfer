@@ -274,7 +274,7 @@ jobs:
             uses: actions-cool/maintain-one-comment@cc0daaf4db77952f0b631bb2c1e169813d78a7fd
             if: github.event_name == 'pull_request' &&
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
-              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+              ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
               update-mode: replace
@@ -287,7 +287,7 @@ jobs:
             uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
             if: github.event_name == 'pull_request' &&
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
-              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+              ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
               token: ${{ secrets.GITHUB_TOKEN }}
               add-labels: "ipfs-published"
