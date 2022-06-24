@@ -288,7 +288,7 @@ jobs:
               token: ${{ secrets.REPO_ACCESS }}
               update-mode: replace
               body: |
-                Web app was deployed to IPFS: ```CIDv1:${{env.IPFS_HASH}}```
+                Web app was deployed to IPFS: ```${{env.IPFS_HASH}}```
                 * Private Gateway: [ipfs.kira.network/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
                 * Public Gateway: [ipfs.io/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
           - name: Add IPFS published label
