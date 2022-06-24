@@ -31,6 +31,10 @@
 .pub/
 /build/
 /bin/
+/bin
+/bin/*
+bin/
+bin/*
 
 # Web related
 lib/generated_plugin_registrant.dart
