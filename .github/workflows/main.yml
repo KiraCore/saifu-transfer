@@ -185,6 +185,7 @@ jobs:
               echo "  Release ver.: ${{ env.RELEASE_VER }}"
               echo "Release exists: ${{ env.RELEASE_EXISTS }}"
               echo " IPFS CID hash: ${{ env.IPFS_HASH }}"
+              echo "IPFS CID short: ${{ env.IPFS_HASH_SHORT }}"
               echo "   Pre-release: ${{ env.PRE_RELEASE }}"
           - name: Reject on error
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
@@ -288,8 +289,8 @@ jobs:
               update-mode: replace
               body: |
                 Web app was deployed to IPFS: ```CIDv1:${{env.IPFS_HASH}}```
-                * Private Gateway: [ipfs.kira.network/ipfs/${env.IPFS_HASH_SHORT}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
-                * Public Gateway: [ipfs.io/ipfs/${env.IPFS_HASH_SHORT}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
+                * Private Gateway: [ipfs.kira.network/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
+                * Public Gateway: [ipfs.io/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
           - name: Add IPFS published label
             # ref.: https://github.com/andymckay/labeler, v1.0.4
             uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
