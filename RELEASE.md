@@ -1,7 +1,3 @@
-## saifu-transfer
+Features:
 
-###### Simple end to end encrypted & over the air file transfers
-
-### Features:
-
-- NA
+* Added IPFS release
