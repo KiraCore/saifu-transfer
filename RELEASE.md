@@ -1,3 +1,3 @@
 Features:
 
-* Added IPFS release
+* Added IPFS app, cid & corresponding signatures to release files
