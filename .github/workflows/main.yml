@@ -83,6 +83,8 @@ jobs:
           - name: Local Integration Testsing
             run: |
               make local-test
+          # IPFS_OLD_HASH=$(ipfs-api pinned saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT --verbose=true | tail -n 1 | bash-utils jsonParse "rows.[0].ipfs_pin_hash" || echo "") && \
+          #    [ ! -z "$IPFS_OLD_HASH" ] && ipfs-api delete $IPFS_OLD_HASH --key=$PINATA_API_JWT --verbose=true && echo "deleted: $IPFS_OLD_HASH"
           - name: Publishing Binaries
             shell: bash
             run: |
@@ -93,15 +95,15 @@ jobs:
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
               ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
               IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".hash")
-              echo "IPFS_HASH=$IPFS_HASH" >> ./bin/public-envs.sh
+              echo "IPFS_HASH" > ./bin/ipfs-cid.txt
               echo "INFO: Updating release file"
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
               cp -fv ./src.tar.gz ./bin/source-code.tar.gz
               chmod -Rv 777 ./bin
-              echo -e "\n\r\n\r\Live web app:" >> ./bin/RELEASE.md
-              echo -e " * Private Gateway: [https://ipfs.kira.network/ipfs/$IPFS_HASH](https://ipfs.kira.network/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
-              echo -e " * Public Gateway: [https://ipfs.io/ipfs/$IPFS_HASH](https://ipfs.io/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
+              echo -e "\n\r\n\rPublished web app:" >> ./bin/RELEASE.md
+              echo -e " * Private Gateway: [ipfs.kira.network/ipfs/${IPFS_HASH::10}${IPFS_HASH::-3}](https://ipfs.kira.network/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
+              echo -e " * Public Gateway: [ipfs.io/ipfs/${IPFS_HASH::10}${IPFS_HASH::-3}](https://ipfs.io/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
               echo -e "\n\r\n\r\`\`\`" >> ./bin/RELEASE.md
               echo -e "      Release Versions: $RELEASE_VER" >> ./bin/RELEASE.md
               echo -e "     Release Date Time: $(date --rfc-2822)" >> ./bin/RELEASE.md
@@ -147,8 +149,7 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
               tar xvf ./bin.tar.gz
               chmod -Rv 777 ./
-              . ./public-envs.sh
-              echo "IPFS_HASH=$IPFS_HASH" >> $GITHUB_ENV
+              echo "IPFS_HASH=$(cat ./ipfs-cid.txt)" >> $GITHUB_ENV
               RELEASE_VER=$(cat ./RELEASE.md | tac | grep -Fn -m 1 'Release Versions: ' | rev | cut -d ":" -f1 | rev | xargs | tr -dc '[:alnum:]\-\.' || echo '')
               echo "RELEASE_VER=$RELEASE_VER" >> $GITHUB_ENV
               REPOSITORY_NAME="${{ github.event.repository.name }}"
@@ -223,6 +224,10 @@ jobs:
               files: |
                 ./html-web-app.zip
                 ./html-web-app.zip.sig
+                ./ipfs-web-app.zip
+                ./ipfs-web-app.zip.sig
+                ./ipfs-cid.txt
+                ./ipfs-cid.txt.sig
                 ./source-code.tar.gz
                 ./source-code.tar.gz.sig
           # ref.: https://github.com/hmarr/auto-approve-action, v2.1.0
@@ -280,8 +285,8 @@ jobs:
               update-mode: replace
               body: |
                 Web app was deployed to IPFS: ```CIDv1:${{env.IPFS_HASH}}```
-                * Private Gateway: [ipfs.kira.network](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
-                * Public Gateway: [ipfs.io](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
+                * Private Gateway: [ipfs.kira.network/ipfs/${env.IPFS_HASH::10}${env.IPFS_HASH::-3}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
+                * Public Gateway: [ipfs.io/ipfs/${env.IPFS_HASH::10}${env.IPFS_HASH::-3}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
           - name: Add IPFS published label
             # ref.: https://github.com/andymckay/labeler, v1.0.4
             uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
