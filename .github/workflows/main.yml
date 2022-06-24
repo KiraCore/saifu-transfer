@@ -276,10 +276,10 @@ jobs:
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
               ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
-              token: ${{ secrets.GITHUB_TOKEN }}
+              token: ${{ secrets.REPO_ACCESS }}
               update-mode: replace
               body: |
-                Web app was deployed to IPFS: ```CIDv1:{{env.IPFS_HASH}}```
+                Web app was deployed to IPFS: ```CIDv1:${{env.IPFS_HASH}}```
                 * Private Gateway: [ipfs.kira.network](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
                 * Public Gateway: [ipfs.io](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
           - name: Add IPFS published label
@@ -289,5 +289,5 @@ jobs:
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
               ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
-              token: ${{ secrets.GITHUB_TOKEN }}
+              token: ${{ secrets.REPO_ACCESS }}
               add-labels: "ipfs-published"
