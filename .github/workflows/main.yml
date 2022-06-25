@@ -16,7 +16,7 @@ jobs:
       id-token: write
       pull-requests: write
     container:
-      image: ghcr.io/kiracore/docker/base-image:v0.9.2-rc.2
+      image: ghcr.io/kiracore/docker/base-image:v0.10.8
     steps:
           # Work around https://github.com/actions/checkout/issues/760
           - name: Add safe.directory
@@ -64,39 +64,53 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
               cd ../ && tar -czvf src.tar.gz -C ./saifu-transfer . && cp ./src.tar.gz ./saifu-transfer/src.tar.gz
               cd ./saifu-transfer
-               . /etc/profile
-              go version
               flutter --version
-              echo "Bash Utils Version: $(bashUtilsVersion)"
+              echo "Bash Utils Version: $(bash-utils bashUtilsVersion)"
               echo "     Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
-              echo "       Event name: ${{ github.event_name }}"
-              echo "  Repository name: ${{ env.REPOSITORY_NAME }}"
-              echo "  Release version: ${{ env.RELEASE_VER }}"
-              echo "   Release exists: ${{ env.RELEASE_EXISTS }}"
+              echo "        Event name: ${{ github.event_name }}"
+              echo "   Repository name: ${{ env.REPOSITORY_NAME }}"
+              echo "   Release version: ${{ env.RELEASE_VER }}"
+              echo "    Release exists: ${{ env.RELEASE_EXISTS }}"
           - name: SAIFU transfer Build & Install Packages
             run: |
               echo "(current dir): $PWD" && ls -l ./
               chmod -Rv 555 ./scripts
               make build
-          #- name: SAIFU Unit Tests
-          #  run: |
-          #    make test
-          #- name: SAIFU Local Integration Tests
-          #  run: |
-          #    make local-test
-          - name: Publishing SAIFU Binaries
+          - name: Unit Testsing
+            run: |
+              make test
+          - name: Local Integration Testsing
+            run: |
+              make local-test
+          # IPFS_OLD_HASH=$(ipfs-api pinned saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT --verbose=true | tail -n 1 | bash-utils jsonParse "rows.[0].ipfs_pin_hash" || echo "") && \
+          #    [ ! -z "$IPFS_OLD_HASH" ] && ipfs-api delete $IPFS_OLD_HASH --key=$PINATA_API_JWT --verbose=true && echo "deleted: $IPFS_OLD_HASH"
+          - name: Publishing Binaries
             shell: bash
             run: |
+              set -x
               make publish
+              echo "INFO: Unpacking web app..."
+              rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
+              unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
+              ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
+              IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".hash")
+              IPFS_HASH_SHORT=${IPFS_HASH::10}...${IPFS_HASH: -3}
+              echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
+              echo "INFO: Updating release file"
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
               cp -fv ./src.tar.gz ./bin/source-code.tar.gz
               chmod -Rv 777 ./bin
+              echo -e "\n\r\n\rPublished web app:" >> ./bin/RELEASE.md
+              echo -e " * Private Gateway: [ipfs.kira.network/ipfs/${IPFS_HASH_SHORT}](https://ipfs.kira.network/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
+              echo -e " * Public Gateway: [ipfs.io/ipfs/${IPFS_HASH_SHORT}](https://ipfs.io/ipfs/$IPFS_HASH/index.html)" >> ./bin/RELEASE.md
               echo -e "\n\r\n\r\`\`\`" >> ./bin/RELEASE.md
               echo -e "      Release Versions: $RELEASE_VER" >> ./bin/RELEASE.md
               echo -e "     Release Date Time: $(date --rfc-2822)" >> ./bin/RELEASE.md
+              echo -e "   IPFS Hosted Web App:  CIDv1:$IPFS_HASH" >> ./bin/RELEASE.md
               echo "      html-web-app.zip: sha256:$(sha256sum ./bin/html-web-app.zip | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "      ipfs-web-app.zip: sha256:$(sha256sum ./bin/ipfs-web-app.zip | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "    source-code.tar.gz: sha256:$(sha256sum ./bin/source-code.tar.gz | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo -e "\`\`\`"   >> ./bin/RELEASE.md
               tar -czvf bin.tar.gz -C ./bin .
@@ -136,6 +150,9 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
               tar xvf ./bin.tar.gz
               chmod -Rv 777 ./
+              IPFS_HASH=$(cat ./ipfs-cid.txt)
+              echo "IPFS_HASH=$IPFS_HASH" >> $GITHUB_ENV
+              echo "IPFS_HASH_SHORT=${IPFS_HASH::10}...${IPFS_HASH: -3}" >> $GITHUB_ENV
               RELEASE_VER=$(cat ./RELEASE.md | tac | grep -Fn -m 1 'Release Versions: ' | rev | cut -d ":" -f1 | rev | xargs | tr -dc '[:alnum:]\-\.' || echo '')
               echo "RELEASE_VER=$RELEASE_VER" >> $GITHUB_ENV
               REPOSITORY_NAME="${{ github.event.repository.name }}"
@@ -167,6 +184,8 @@ jobs:
               echo "    Event name: ${{ github.event_name }}"
               echo "  Release ver.: ${{ env.RELEASE_VER }}"
               echo "Release exists: ${{ env.RELEASE_EXISTS }}"
+              echo " IPFS CID hash: ${{ env.IPFS_HASH }}"
+              echo "IPFS CID short: ${{ env.IPFS_HASH_SHORT }}"
               echo "   Pre-release: ${{ env.PRE_RELEASE }}"
           - name: Reject on error
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
@@ -209,6 +228,10 @@ jobs:
               files: |
                 ./html-web-app.zip
                 ./html-web-app.zip.sig
+                ./ipfs-web-app.zip
+                ./ipfs-web-app.zip.sig
+                ./ipfs-cid.txt
+                ./ipfs-cid.txt.sig
                 ./source-code.tar.gz
                 ./source-code.tar.gz.sig
           # ref.: https://github.com/hmarr/auto-approve-action, v2.1.0
@@ -255,4 +278,25 @@ jobs:
               MERGE_LABELS: "automerge"
               GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
               LOG: "TRACE"
-              
+          - name: Comment PR's with IPFS
+            # ref.: https://github.com/actions-cool/maintain-one-comment, v2.0.2
+            uses: actions-cool/maintain-one-comment@cc0daaf4db77952f0b631bb2c1e169813d78a7fd
+            if: github.event_name == 'pull_request' &&
+              ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
+            with:
+              token: ${{ secrets.REPO_ACCESS }}
+              update-mode: replace
+              body: |
+                Web app was deployed to IPFS: ```${{env.IPFS_HASH}}```
+                * Private Gateway: [ipfs.kira.network/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.kira.network/ipfs/${{env.IPFS_HASH}}/index.html)
+                * Public Gateway: [ipfs.io/ipfs/${{env.IPFS_HASH_SHORT}}](https://ipfs.io/ipfs/${{env.IPFS_HASH}}/index.html)
+          - name: Add IPFS published label
+            # ref.: https://github.com/andymckay/labeler, v1.0.4
+            uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
+            if: github.event_name == 'pull_request' &&
+              ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
+            with:
+              token: ${{ secrets.REPO_ACCESS }}
+              add-labels: "ipfs-published"
