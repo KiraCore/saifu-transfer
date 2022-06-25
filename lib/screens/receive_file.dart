@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,8 @@ import 'package:saifu_qr/saifu_qr.dart';
 class ReceiveFile extends StatefulWidget {
   List<String> qrData = [];
   bool encrypted;
-  String checksum = '';
 
-  ReceiveFile({Key key, this.qrData, this.encrypted, this.checksum}) : super(key: key);
+  ReceiveFile({Key key, this.qrData, this.encrypted}) : super(key: key);
 
   @override
   State<ReceiveFile> createState() => _ReceiveFileState();
@@ -33,10 +33,10 @@ class _ReceiveFileState extends State<ReceiveFile> {
   List<String> stdMsgData = [];
   List<int> missedFrames = [];
   String checksum = '';
+  String recievedChecksum = '';
   String fileName = "";
   String fileType = "";
   String base64data = '';
-  bool encrypted = false;
 
   void generateInitialFrames(List<String> qrData, bool encryped) {
     // Recieved QR code data in the format of List<String> Data.
@@ -48,18 +48,20 @@ class _ReceiveFileState extends State<ReceiveFile> {
       dataset.add(decodeJson);
     }
     dataset.sort((m1, m2) {
-      return m1[3].compareTo(m2[3]);
+      return m1[1].compareTo(m2[1]);
     });
     for (var i = 0; i < dataset.length; i++) {
       var dataValue = "";
+
       if (i == 0) {
-        fileName = dataset[i][0];
-        fileType = dataset[i][1];
-        dataValue = dataset[i][4];
-        data = data + dataValue;
+        fileName = dataset[i][4][0].toString();
+        fileType = dataset[i][4][1].toString();
+        recievedChecksum = dataset[i][4][3];
+        dataValue = dataset[i][4][4].toString();
+        data = data.toString() + dataValue.toString();
       } else if (i != 0) {
-        dataValue = dataset[i][4];
-        data = data + dataValue;
+        dataValue = dataset[i][4][4].toString();
+        data = data.toString() + dataValue.toString();
       }
     }
     base64data = data;
@@ -73,21 +75,45 @@ class _ReceiveFileState extends State<ReceiveFile> {
       var pageCount = i + 1;
       if (missedFrames.isEmpty) {
         if (i == 0) {
-          framesData = [fileName, fileType, processQrData.length, pageCount, processQrData[i], checksum, processQrData.length, widget.encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processQrData.length,
+            processQrData.length,
+            [fileName, fileType, widget.encrypted ? 0 : 1, checksum, processQrData[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0) {
-          framesData = [[], [], processQrData.length, pageCount, processQrData[i], [], processQrData.length, widget.encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processQrData.length,
+            processQrData.length,
+            [[], [], widget.encrypted ? 0 : 1, [], processQrData[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
-          framesData = [fileName, fileType, processQrData.length, pageCount, processQrData[i], checksum, missedFrames.length, widget.encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processQrData.length,
+            missedFrames.length,
+            [fileName, fileType, widget.encrypted ? 0 : 1, checksum, processQrData[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
-          framesData = [[], [], processQrData.length, pageCount, processQrData[i], [], missedFrames.length, widget.encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processQrData.length,
+            missedFrames.length,
+            [[], [], widget.encrypted ? 0 : 1, [], processQrData[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
@@ -266,10 +292,59 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                 icon: const Icon(Icons.navigate_before_outlined)),
                                             const Spacer(),
                                             EmojiWidget(checksum: checksum),
-                                            const Spacer()
+                                            const Spacer(),
                                           ],
                                         ),
                                       ),
+                                      widget.encrypted
+                                          ? Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(5)),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          "File IS encrypted",
+                                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                        child: Icon(
+                                                          Icons.lock_outlined,
+                                                          size: 25,
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                    ])),
+                                              ],
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                    decoration: BoxDecoration(color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+                                                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          "WARNING: File IS NOT encrypted",
+                                                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                        child: Icon(
+                                                          Icons.lock_open,
+                                                          size: 25,
+                                                          color: Colors.black,
+                                                        ),
+                                                      )
+                                                    ])),
+                                              ],
+                                            ),
                                       const SizedBox(
                                         height: 10,
                                       ),
@@ -287,38 +362,39 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                               data: stdMsgData,
                                             ),
                                           ),
-                                          Positioned.fill(
-                                            child: Align(
-                                                alignment: Alignment.bottomCenter,
-                                                child: encrypted
-                                                    ? Container(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
-                                                            color: Colors.white,
-                                                            borderRadius: BorderRadius.all(
-                                                              Radius.circular(20.0),
-                                                            )),
-                                                        child: Icon(
-                                                          Icons.lock_outlined,
-                                                          size: 30,
-                                                          color: Colors.red,
-                                                        ),
-                                                      )
-                                                    : Container(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        decoration: BoxDecoration(
-                                                            border: Border.all(color: Colors.grey),
-                                                            color: Colors.white,
-                                                            borderRadius: BorderRadius.all(
-                                                              Radius.circular(20.0),
-                                                            )),
-                                                        child: Icon(
-                                                          Icons.lock_open_outlined,
-                                                          size: 30,
-                                                          color: Colors.black,
-                                                        ),
-                                                      )),
+                                          Visibility(
+                                            visible: false,
+                                            child: Positioned.fill(
+                                              child: Align(
+                                                  alignment: Alignment.bottomCenter,
+                                                  child: widget.encrypted
+                                                      ? Container(
+                                                          padding: const EdgeInsets.all(5.0),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white,
+                                                              borderRadius: BorderRadius.all(
+                                                                Radius.circular(20.0),
+                                                              )),
+                                                          child: Icon(
+                                                            Icons.lock_outlined,
+                                                            size: 30,
+                                                            color: Colors.black,
+                                                          ),
+                                                        )
+                                                      : Container(
+                                                          padding: const EdgeInsets.all(5.0),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white,
+                                                              borderRadius: BorderRadius.all(
+                                                                Radius.circular(20.0),
+                                                              )),
+                                                          child: Icon(
+                                                            Icons.lock_open,
+                                                            size: 30,
+                                                            color: Colors.black,
+                                                          ),
+                                                        )),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -327,7 +403,7 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Wrap(
                                             direction: Axis.horizontal,
-                                            alignment: WrapAlignment.spaceBetween,
+                                            alignment: WrapAlignment.center,
                                             children: [
                                               Text(fileName, overflow: TextOverflow.ellipsis),
                                             ],
@@ -360,7 +436,7 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                   padding: EdgeInsets.all(12.0),
                                                   child: SizedBox(
                                                     width: 200,
-                                                    child: encrypted
+                                                    child: widget.encrypted
                                                         ? Text(
                                                             "Unlock file with a Password",
                                                             style: TextStyle(color: Colors.white),
@@ -372,22 +448,22 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                   ),
                                                 ),
                                                 onPressed: () async {
-                                                  if (encrypted) {
-                                                    dynamic data = await showDialog(barrierDismissible: false, context: context, builder: (_) => SecureDialog(base64data, encrypted));
+                                                  if (widget.encrypted) {
+                                                    dynamic data = await showDialog(barrierDismissible: false, context: context, builder: (_) => SecureDialog(base64data, widget.encrypted));
                                                     if (data == false) {
                                                     } else {
                                                       setState(() {
-                                                        encrypted = false;
+                                                        widget.encrypted = false;
                                                         base64data = data;
                                                       });
                                                       generateFrames(data, 200);
                                                     }
                                                   } else {
-                                                    dynamic data = await showDialog(barrierDismissible: false, context: context, builder: (_) => SecureDialog(base64data, encrypted));
+                                                    dynamic data = await showDialog(barrierDismissible: false, context: context, builder: (_) => SecureDialog(base64data, widget.encrypted));
                                                     if (data == false) {
                                                     } else {
                                                       setState(() {
-                                                        encrypted = true;
+                                                        widget.encrypted = true;
                                                         base64data = data;
                                                       });
                                                       generateFrames(data, 200);
@@ -427,6 +503,49 @@ class _ReceiveFileState extends State<ReceiveFile> {
                                                 }
                                               },
                                               style: ElevatedButton.styleFrom(primary: Colors.grey[50], shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 250,
+                                          child: ElevatedButton.icon(
+                                            icon: const Icon(
+                                              Icons.file_download_outlined,
+                                              color: Colors.black,
+                                            ),
+                                            label: const Padding(
+                                              padding: EdgeInsets.all(12.0),
+                                              child: SizedBox(
+                                                width: 200,
+                                                child: Text(
+                                                  "Download received file",
+                                                  style: TextStyle(color: Colors.black),
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () async {
+                                              if (widget.encrypted == true) {
+                                                dynamic data = await showDialog(barrierDismissible: false, context: context, builder: (_) => SecureDialog(base64data, widget.encrypted));
+                                                if (data == false) {
+                                                } else {
+                                                  var decode = base64.decode(data);
+                                                  var gzipBytes = GZipDecoder().decodeBytes(decode) as Uint8List;
+                                                  downloadFile(gzipBytes);
+                                                }
+                                              } else {
+                                                var decode = base64.decode(base64data);
+                                                var gzipBytes = GZipDecoder().decodeBytes(decode) as Uint8List;
+                                                downloadFile(gzipBytes);
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Colors.grey[50],
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                         const SizedBox(height: 10),
                                         SizedBox(

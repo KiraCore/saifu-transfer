@@ -66,8 +66,8 @@ class _QrCodeFileTransferState extends State<QrCodeFileTransfer> {
                             webcamData.add(scanData);
                             final decoded = jsonDecode(scanData);
                             originalMax = decoded[2];
-                            maxFrames = decoded[6];
-                            secure = decoded[7] == 0 ? true : false;
+                            maxFrames = decoded[3];
+                            secure = decoded[4][2] == 0 ? true : false;
                             setState(() {
                               percentage = (webcamData.toSet().length / originalMax) * 100;
                             });

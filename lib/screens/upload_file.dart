@@ -55,21 +55,46 @@ class _UploadedFileState extends State<UploadedFile> {
       var pageCount = i + 1;
       if (missedFrames.isEmpty) {
         if (i == 0) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, processdata.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            processdata.length,
+            [widget.file.name, widget.file.mime, encrypted ? 0 : 1, checksum, processdata[i]]
+          ];
+
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0) {
-          framesData = [[], [], processdata.length, pageCount, processdata[i], [], processdata.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            processdata.length,
+            [[], [], encrypted ? 0 : 1, [], processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
       } else {
         if (i == 0 && missedFrames.contains(pageCount)) {
-          framesData = [widget.file.name, widget.file.mime, processdata.length, pageCount, processdata[i], checksum, missedFrames.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            missedFrames.length,
+            [widget.file.name, widget.file.mime, encrypted ? 0 : 1, checksum, processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         } else if (i != 0 && missedFrames.contains(pageCount)) {
-          framesData = [[], [], processdata.length, pageCount, processdata[i], [], missedFrames.length, encrypted ? 0 : 1];
+          framesData = [
+            "file_transfer",
+            pageCount,
+            processdata.length,
+            missedFrames.length,
+            [[], [], encrypted ? 0 : 1, [], processdata[i]]
+          ];
           var jsonFrame = jsonEncode(framesData);
           stdMsgData.add(jsonFrame);
         }
@@ -155,6 +180,55 @@ class _UploadedFileState extends State<UploadedFile> {
                                     ],
                                   ),
                                 ),
+                                encrypted
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(5)),
+                                              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                    "File IS encrypted",
+                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                  child: Icon(
+                                                    Icons.lock_outlined,
+                                                    size: 25,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              ])),
+                                        ],
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              decoration: BoxDecoration(color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+                                              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                    "WARNING: File IS NOT encrypted",
+                                                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                  child: Icon(
+                                                    Icons.lock_open,
+                                                    size: 25,
+                                                    color: Colors.black,
+                                                  ),
+                                                )
+                                              ])),
+                                        ],
+                                      ),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -172,38 +246,39 @@ class _UploadedFileState extends State<UploadedFile> {
                                         data: stdMsgData,
                                       ),
                                     ),
-                                    Positioned.fill(
-                                      child: Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: encrypted
-                                              ? Container(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(color: Colors.grey),
-                                                      color: Colors.white,
-                                                      borderRadius: BorderRadius.all(
-                                                        Radius.circular(20.0),
-                                                      )),
-                                                  child: Icon(
-                                                    Icons.lock_outlined,
-                                                    size: 30,
-                                                    color: Colors.red,
-                                                  ),
-                                                )
-                                              : Container(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(color: Colors.grey),
-                                                      color: Colors.white,
-                                                      borderRadius: BorderRadius.all(
-                                                        Radius.circular(20.0),
-                                                      )),
-                                                  child: Icon(
-                                                    Icons.lock_open_outlined,
-                                                    size: 30,
-                                                    color: Colors.black,
-                                                  ),
-                                                )),
+                                    Visibility(
+                                      visible: false,
+                                      child: Positioned.fill(
+                                        child: Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: encrypted
+                                                ? Container(
+                                                    padding: const EdgeInsets.all(5.0),
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.all(
+                                                          Radius.circular(20.0),
+                                                        )),
+                                                    child: Icon(
+                                                      Icons.lock_outlined,
+                                                      size: 30,
+                                                      color: Colors.black,
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    padding: const EdgeInsets.all(5.0),
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.all(
+                                                          Radius.circular(20.0),
+                                                        )),
+                                                    child: Icon(
+                                                      Icons.lock_open,
+                                                      size: 30,
+                                                      color: Colors.black,
+                                                    ),
+                                                  )),
+                                      ),
                                     ),
                                   ],
                                 ),

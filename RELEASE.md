@@ -1,4 +1,3 @@
-## SAIFU transfer
+Features:
 
-### Features:
-* This is just a simple build test
+* Added IPFS app, cid & corresponding signatures to release files
