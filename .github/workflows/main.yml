@@ -92,7 +92,7 @@ jobs:
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
               IPFS_UPLOAD_NAME=saifu-transfer-www-$RELEASE_VER
-              ipfs-api delete $IPFS_UPLOAD_NAME --key=$PINATA_API_JWT --verbose=true || echo "WARNING: Failed to delete file with name '$IPFS_UPLOAD_NAME' request failed or it might not exist"
+              ipfs-api delete $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true || echo "WARNING: Failed to delete file with name '$IPFS_UPLOAD_NAME' request failed or it might not exist"
               ipfs-api pin ./build/ipfs $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
               IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".hash")
               IPFS_HASH_SHORT=${IPFS_HASH::10}...${IPFS_HASH: -3}
