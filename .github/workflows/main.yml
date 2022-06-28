@@ -83,8 +83,6 @@ jobs:
           - name: Local Integration Testsing
             run: |
               make local-test
-          # IPFS_OLD_HASH=$(ipfs-api pinned saifu-transfer-www-$RELEASE_VER --key=$PINATA_API_JWT --verbose=true | tail -n 1 | bash-utils jsonParse "rows.[0].ipfs_pin_hash" || echo "") && \
-          #    [ ! -z "$IPFS_OLD_HASH" ] && ipfs-api delete $IPFS_OLD_HASH --key=$PINATA_API_JWT --verbose=true && echo "deleted: $IPFS_OLD_HASH"
           - name: Publishing Binaries
             shell: bash
             run: |
@@ -93,10 +91,50 @@ jobs:
               echo "INFO: Unpacking web app..."
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
-              ipfs-api pin ./build/ipfs saifu-transfer-www-$RELEASE_VER --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
-              IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".hash")
-              IPFS_HASH_SHORT=${IPFS_HASH::10}...${IPFS_HASH: -3}
+          - name: Await IPFS files to be pinned
+            if: github.event_name == 'pull_request' 
+            shell: bash
+            run: |
+              set -x
+              bash-utils timerStart "pinned-timeout"
+              sleep 120
+              IPFS_HASH=""
+              IPFS_UPLOAD_NAME=saifu-transfer-www-$RELEASE_VER
+              while [ -z "$IPFS_HASH" ] || [ $(bash-utils timerSpan "pinned-timeout") -gt 900 ] ; do
+                bash-utils echoInfo "INFO: Waiting for IPFS files to be pinned..."
+                rm ./ipfs-pinned.log && touch ./ipfs-pinned.log
+                sleep 10
+                ipfs-api pinned $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pinned.log || echo "ERROR: Faile to find pinned files"
+                IPFS_HASH=$(cat ./ipfs-pinned.log | tail -n 1 | bash-utils jsonParse "rows.[0].ipfs_pin_hash" || echo "")
+                cat ./ipfs-pinned.log
+                sleep 10
+              done
               echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
+          - name: Pin IPFS files
+            if: github.event_name == 'push' 
+            shell: bash
+            run: |
+              set -x
+              bash-utils timerStart "pin-timeout"
+              IPFS_HASH=""
+              IPFS_UPLOAD_NAME=saifu-transfer-www-$RELEASE_VER
+              while [ -z "$IPFS_HASH" ] || [ $(bash-utils timerSpan "pin-timeout") -gt 300 ] ; do
+                bash-utils echoInfo "INFO: Attempting fils pin to IPFS..."
+                rm ./ipfs-pin.log && touch ./ipfs-pin.log
+                ipfs-api delete $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true || echo "WARNING: Failed to delete file with name '$IPFS_UPLOAD_NAME' request failed or it might not exist"
+                ipfs-api pin ./build/ipfs $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pin.log || echo "ERROR: Failed to pin web app"
+                IPFS_HASH=$(cat ./ipfs-pin.log | tail -n 1 | bash-utils jsonParse ".hash" || echo "")
+                cat ./ipfs-pin.log
+                sleep 10
+              done
+              echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
+          - name: Publish RELEASE info
+            shell: bash
+            run: |
+              set -x
+              IPFS_HASH=$(cat ./bin/ipfs-cid.txt)
+              [ -z "$IPFS_HASH" ] && echo "ERROR: Failed to pin or discover pinned web app!" && exit 1 || echo "INFO: Success, files were found or pinned!"
+              IPFS_HASH_SHORT=${IPFS_HASH::10}...${IPFS_HASH: -3}
               echo "INFO: Updating release file"
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
