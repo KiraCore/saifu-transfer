@@ -112,7 +112,7 @@ jobs:
               done
               echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
           - name: Pin IPFS files
-            if: github.event_name == 'push' &&
+            if: github.event_name == 'push' && env.RELEASE_EXISTS == false &&
                 ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'refactor') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
