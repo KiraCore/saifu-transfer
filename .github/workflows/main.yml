@@ -92,7 +92,8 @@ jobs:
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
           - name: Await IPFS files to be pinned
-            if: github.event_name == 'pull_request' 
+            if: github.event_name == 'pull_request' || 
+                ( github.event_name == 'push' && !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'refactor') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
               set -x
@@ -104,14 +105,15 @@ jobs:
                 bash-utils echoInfo "INFO: Waiting for IPFS files to be pinned..."
                 rm ./ipfs-pinned.log && touch ./ipfs-pinned.log
                 sleep 10
-                ipfs-api pinned $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pinned.log || echo "ERROR: Faile to find pinned files"
+                ipfs-api pinned $IPFS_UPLOAD_NAME --key=${{secrets.PINATA_API_JWT}} --verbose=true | tee -a ./ipfs-pinned.log || echo "ERROR: Failed to find pinned files"
                 IPFS_HASH=$(cat ./ipfs-pinned.log | tail -n 1 | bash-utils jsonParse "rows.[0].ipfs_pin_hash" || echo "")
                 cat ./ipfs-pinned.log
                 sleep 10
               done
               echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
           - name: Pin IPFS files
-            if: github.event_name == 'push' 
+            if: github.event_name == 'push' &&
+                ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'refactor') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
               set -x
