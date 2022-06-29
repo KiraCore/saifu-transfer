@@ -92,7 +92,8 @@ jobs:
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
           - name: Find or await IPFS files to be pinned
-            if: github.event_name == 'pull_request' || env.RELEASE_EXISTS == true || 
+            if: github.event_name == 'pull_request' || 
+                ( env.RELEASE_EXISTS == true || env.RELEASE_EXISTS == 'true' ) || 
                 ( github.event_name == 'push' && !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'refactor') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
@@ -112,7 +113,8 @@ jobs:
               done
               echo "$IPFS_HASH" > ./bin/ipfs-cid.txt
           - name: Pin IPFS files
-            if: github.event_name == 'push' && env.RELEASE_EXISTS == false &&
+            if: github.event_name == 'push' && 
+                ( env.RELEASE_EXISTS == false || env.RELEASE_EXISTS == 'false' ) &&
                 ( startsWith(env.SOURCE_BRANCH, 'feature') || startsWith(env.SOURCE_BRANCH, 'refactor') || startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
