@@ -91,8 +91,8 @@ jobs:
               echo "INFO: Unpacking web app..."
               rm -rfv ./build/ipfs && mkdir -p ./build/ipfs && cd ./build/ipfs
               unzip ../../bin/ipfs-web-app.zip && ls -l ./ && cd ../../
-          - name: Await IPFS files to be pinned
-            if: github.event_name == 'pull_request' || 
+          - name: Find or await IPFS files to be pinned
+            if: github.event_name == 'pull_request' || env.RELEASE_EXISTS == true || 
                 ( github.event_name == 'push' && !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'refactor') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             shell: bash
             run: |
